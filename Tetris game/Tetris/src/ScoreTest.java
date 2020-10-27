@@ -22,7 +22,7 @@ class ScoreTest {
     } // end setup
     
     @Test
-    void testIncreaseScore1() {
+    void testIncreaseScore() {
         // doing score increases
         s1.increaseScore(10);
         
@@ -31,11 +31,7 @@ class ScoreTest {
     } // end testIncreaseScore
     
     @Test
-    void testIncreaseScore2() {
-        // doing score increases
-        s2.increaseScore(0);
-        
-        // seeing if the function got the right number
+    void testConstructor() {
         assertEquals(0, s1.getScore());
     } // end testIncreaseScore
 
