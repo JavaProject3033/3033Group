@@ -21,16 +21,17 @@ class BlockColorTest {
     @Test
     void testDefaultConstructor1() {
         assertEquals(0, bc1.getColor());
-    } // end testSoundConstructor
+    } 
    
+    @Test
     void testDefaultConstructor2() {
         assertEquals(BlockColor.COLORS, BlockColor.currentColors);
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testConstructor() {
         assertEquals(3, bc2.getColor());
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testIsEqual1() {
@@ -38,7 +39,7 @@ class BlockColorTest {
         bc2.setColor(3);
         
         assertTrue(bc1.isEqual(bc2));
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testIsEqual2() {
@@ -46,29 +47,29 @@ class BlockColorTest {
         bc2.setColor(3);
         
         assertFalse(bc1.isEqual(bc2));
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testToggleColorblindMode1() {
         assertEquals(BlockColor.COLORBLIND_COLORS, BlockColor.currentColors);
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testToggleColorblindMode2() {
         assertEquals(BlockColor.COLORS, BlockColor.currentColors);
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testGetColor() {
         bc1.setColor(0);
         
         assertEquals(0, bc1.getColor());
-    } // end testSoundConstructor
+    } 
     
     @Test
     void testSetColor() {
         bc1.setColor(5);
         
         assertEquals(5, bc1.getColor());
-    } // end testSoundConstructor
+    } 
 } // end BlockColorTest
