@@ -11,11 +11,14 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
+import java.util.*;
 
 public class ShapeTest {
     Shape shape1, shape2, shape3;
     Shape o1, i1, s1, z1, l1, j1, t1;
     Shape o2, i2, s2, z2, l2, j2, t2;
+    
+    boolean[][][][] allShapes;
     
     @BeforeClass
     public static void setup() {
@@ -38,21 +41,64 @@ public class ShapeTest {
         l2 = new Shape('l', 3);
         j2 = new Shape('j', 3);
         t2 = new Shape('t', 3);
+        
+        allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
     } // end setup
     
     @Test
-    void testDefaultConstructor() {
-        assertNotEquals(null, shape1.getShape());
+    void testDefaultConstructor1() {
+        assertNotNull(shape1.getShape());
+    } // end testSoundConstructor
+    
+    // making sure the shape array is not the same array (address-wise) as a static final array
+    @Test
+    void testDefaultConstructor2() {
+        boolean sameArray = false;
+        
+        for(int i = 0; i < Shape.NUM_SHAPES; i++) {
+            for(int j = 0; j < allShapes[i].length; j++) {
+                if(allShapes[i][j] == shape.getShape()) {
+                    sameArray = true;
+                    break;
+                } // end if
+            } // end for
+        } // end for
+        
+        assertFalse(sameArray);
+    } // end testSoundConstructor
+    
+    // making sure the shape array is equal (element-wise, but not address-wise) to a static final array
+    @Test
+    void testDefaultConstructor3() {
+        boolean sameElements = false;
+        
+        for(int i = 0; i < Shape.NUM_SHAPES; i++) {
+            for(int j = 0; j < allShapes[i].length; j++) {
+                if(Arrays.equals(allShapes[i][j], shape1.getShape())) {
+                    sameElements = true;
+                    break;
+                } // end if
+            } // end for
+        } // end for
+        
+        assertTrue(sameElements);
     } // end testSoundConstructor
     
     @Test
     void testConstructor1() {
-        assertEquals(Shape.J[0], shape2.getShape());
+        assertArrayEquals(Shape.J[0], shape2.getShape());
     } // end testSoundConstructor
     
+    // making sure that shape has the correct 2D array in it
     @Test
     void testConstructor2() {
-        assertEquals(Shape.J[2], shape2.getShape());
+        assertArrayEquals(Shape.J[2], shape3.getShape());
+    } // end testSoundConstructor
+    
+    // making sure that the shape is NOT the same object (i.e. is a copy of) the 3D static final array element
+    @Test
+    void testConstructor3() {
+        assertNotEquals(Shape.J[2], shape3.getShape());
     } // end testSoundConstructor
     
     @Test
