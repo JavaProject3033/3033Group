@@ -7,12 +7,9 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Arrays;
-
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
-
 import junit.framework.Assert;
 
 public class BoardTest {
