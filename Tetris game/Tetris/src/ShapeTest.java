@@ -18,7 +18,7 @@ public class ShapeTest {
     Shape o1, i1, s1, z1, l1, j1, t1;
     Shape o2, i2, s2, z2, l2, j2, t2;
     
-    boolean[][][][] allShapes;
+    boolean[][][][] allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
     
     @BeforeClass
     public static void setup() {
@@ -41,8 +41,6 @@ public class ShapeTest {
         l2 = new Shape('l', 3);
         j2 = new Shape('j', 3);
         t2 = new Shape('t', 3);
-        
-        allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
     } // end setup
     
     @Test
