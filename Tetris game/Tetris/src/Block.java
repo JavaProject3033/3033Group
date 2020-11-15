@@ -51,18 +51,43 @@ class Block {
 	void setShape(Shape newShape) {
 		blockShape = newShape;
 	}
-	
+	void rotate() {
+		int height = blockShape.getHeight();
+		int width = blockShape.getWidth();
+		int i = 0;
+		int j = 0;
+		boolean pointFound = false;
+		int tempPointX = 0;
+		int tempPointY = 0;
+		blockShape.setShape(orientation);
+		boolean[height][width] tempShape = blockShape.getShape();
+		for(i = 0, i < height, i++) {
+			for(j = 0, j < width, j++) {
+				if(!pointFound) {
+					if (tempShape[i][j] == 1) {
+						pointFound = true;
+						tempPointX = j;
+						tempPointY = i;
+					}
+				}
+			}
+		}
+		updatePoints(tempPointX, tempPointY);
+	}
 	void rotateRight() {
 		orientation++;
-		if(orientation == 5) {
+		if(orientation == 4) {
 			orientation = 0;
 		}
-		blockShape.setShape(orientation);
-		updatePoints
+		rotate();
 	}
 	
 	void rotateLeft() {
-		
+		orientation--;
+		if(orientation == -1) {
+			orientation = 3;
+		}
+		rotate();
 	}
 	
 	void moveLeft() {
