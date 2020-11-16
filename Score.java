@@ -47,7 +47,7 @@ public class Score {
     	return score;
     }
     /*
-     //if needed
+     if needed
     public void setScore(int score)
     {
     	this.score=score;
