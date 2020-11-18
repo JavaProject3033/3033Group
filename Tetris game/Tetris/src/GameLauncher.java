@@ -13,12 +13,12 @@ import javafx.scene.layout.*;
 import javafx.scene.control.*;
 
 public class GameLauncher extends Application {
+    public static final double ITEM_SPACING = 10;
+    public static final int WINDOW_WIDTH = 700;
+    public static final int WINDOW_HEIGHT = (int) (WINDOW_WIDTH * 0.7);
+    
     @Override
     public void start(Stage stage) {
-        double width = 700;
-        double height = width * 0.7;
-        double itemSpacing = 10;
-        
         Score score = new Score();
         Sound sound = new Sound(0.25);
         Game game = new Game();
@@ -38,14 +38,14 @@ public class GameLauncher extends Application {
         // options button
         Button optionsButton = new Button("Options");
         
-        VBox titlePane = new VBox(itemSpacing, gameNameLabel, highScoreLabel);
+        VBox titlePane = new VBox(ITEM_SPACING, gameNameLabel, highScoreLabel);
         titlePane.setAlignment(Pos.CENTER);
         
-        VBox optionsPane = new VBox(itemSpacing, playButton, optionsButton);
+        VBox optionsPane = new VBox(ITEM_SPACING, playButton, optionsButton);
         titlePane.setAlignment(Pos.CENTER);
         
         VBox mainMenuPane = new VBox(titlePane, optionsPane);
-        Scene mainMenuScene = new Scene(mainMenuPane, width, height);
+        Scene mainMenuScene = new Scene(mainMenuPane, WINDOW_WIDTH, WINDOW_HEIGHT);
         stage.setScene(mainMenuScene);
         
         // OPTIONS SCENE
@@ -58,9 +58,9 @@ public class GameLauncher extends Application {
         // return to main menu
         Button returnMainMenuButton = new Button("Back to Main Menu");
         
-        HBox volumePane = new HBox(itemSpacing, volumeLabel, decreaseVolumeButton, currentVolumeLabel, increaseVolumeButton);
-        VBox optionMenuPane = new VBox(itemSpacing, volumePane, returnMainMenuButton);
-        Scene optionsScene = new Scene(optionMenuPane, width, height);
+        HBox volumePane = new HBox(ITEM_SPACING, volumeLabel, decreaseVolumeButton, currentVolumeLabel, increaseVolumeButton);
+        VBox optionMenuPane = new VBox(ITEM_SPACING, volumePane, returnMainMenuButton);
+        Scene optionsScene = new Scene(optionMenuPane, WINDOW_WIDTH, WINDOW_HEIGHT);
         
         // GAME OVER SCENE
         // game over label
@@ -79,19 +79,19 @@ public class GameLauncher extends Application {
         // play again button
         Button playAgainButton = new Button("Play Again");
         
-        VBox endTextPane = new VBox(itemSpacing, gameOverLabel, scoreLabel);
+        VBox endTextPane = new VBox(ITEM_SPACING, gameOverLabel, scoreLabel);
         titlePane.setAlignment(Pos.CENTER);
         
-        VBox endOptionsPane = new VBox(itemSpacing, playAgainButton, returnMainMenuButton);
+        VBox endOptionsPane = new VBox(ITEM_SPACING, playAgainButton, returnMainMenuButton);
         titlePane.setAlignment(Pos.CENTER);
         
         VBox endPane = new VBox(endTextPane, endOptionsPane);
-        Scene endScene = new Scene(endOptionsPane, width, height);
+        Scene endScene = new Scene(endOptionsPane, WINDOW_WIDTH, WINDOW_HEIGHT);
         
         // EVENT HANDLERS
         playButton.setOnAction(e -> {
             // go to the game scene
-            stage.setScene(game.playGame());
+            game.playGame(stage, endScene);
         });
         
         optionsButton.setOnAction(e -> {
@@ -113,7 +113,7 @@ public class GameLauncher extends Application {
         
         playAgainButton.setOnAction(e -> {
             game = new Game();
-            stage.setScene(game.playGame());
+            game.playGame(stage, endScene);
         });
         
         stage.show();
