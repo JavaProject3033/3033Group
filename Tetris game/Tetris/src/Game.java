@@ -6,11 +6,19 @@
 
 import javafx.scene.input.*;
 import javafx.scene.*;
+
+import java.util.Arrays;
+
 import javafx.application.*;
 import javafx.geometry.*;
 import javafx.stage.*;
+import javafx.util.Duration;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.control.*;
+import javafx.scene.shape.*;
+import javafx.animation.*;
+import javafx.event.*;
 
 public class Game {
     private final KeyCode LEFT = KeyCode.LEFT;
@@ -24,9 +32,11 @@ public class Game {
     private final double DROP_SPEED_MULTIPLIER = 0.5; // drop speed in relation to the fall speed
     private double speedMultiplier;
     private double SIDE_PANE_WIDTH = 0.15 * GameLauncher.WINDOW_WIDTH;
+    private static final int POINTS_ARR_LEN = 8;
     
     private boolean exitGame;
     private int squareSideLength; // used for drawing the blocks
+    private final Rectangle[] squares; // GUI representation of the possible squares that make up the board.
     
     Score score;
     Board board;
@@ -38,6 +48,14 @@ public class Game {
         dropSpeed = (int) (FALL_SPEED * DROP_SPEED_MULTIPLIER);
         squareSideLength = 20;
         board = new Board(FALL_SPEED, dropSpeed, squareSideLength);
+        
+        squares = new Rectangle[BlockColor.NUM_COLORS + 1];
+        
+        for(int i = 0; i < squares.length - 1; i++) {
+            squares[i] = new Rectangle(squareSideLength, squareSideLength, BlockColor.COLORS[i]);
+        } // end for
+        
+        squares[squares.length - 1] = new Rectangle(squareSideLength, squareSideLength, Color.WHITE);
     } // end Game default constructor
     
     public void playGame(Stage stage, Scene nextScene) {
@@ -96,24 +114,115 @@ public class Game {
         
         // rotating block right
         
-        // pane, scene stuff
+        // automatic falling blocks handler
+        EventHandler<ActionEvent> blockFallingHandler = e -> {
+            if(!isAtBottom(board.getCurrent())) { // if the block is not at a bottom (i.e. resting on another block or at the board bottom)
+                // move it down by one row
+                int currentX = board.getCurrent().getPoints[0];
+                int newY = board.getCurrent().getPoints[1];
+                board.getCurrent().updatePoints(currentX, newY);
+            } // end if
+        };
+        
+        // BLOCKS WILL FALL AUTOMATICALLY ...
+        // ... until they reach the bottom of the board.
+        Timeline blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED), blockFallingHandler));
+        
+        // check for rows and colors to clear
+        board.clearRow();
+        board.clearColors();
+        
+        // remove any blank blocks from the board
+        board.removeBlankBlocks();
+        
+        // move floating blocks down
+        // TODO may may not need this if the clear colors and stuff does this...
+        
+        // put the next block on the board
+        board.nextBlock();
+        
+        // update the preview panes
+        // set the first preview to the block after the current block in the futureBlocks array
+        setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
+        
+        // set the second preview to the block after the first preview
+        setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
+        
+        // MAIN PANE AND SCENE GUI
         HBox mainPane = new HBox(GameLauncher.ITEM_SPACING, leftPane, boardPane, rightPane);
         Scene scene = new Scene(mainPane, GameLauncher.WINDOW_WIDTH, GameLauncher.WINDOW_HEIGHT);
         
         stage.setScene(scene);
     } // end playGame
     
-    private void updatePreviewPane() {
-        // TODO?
-    } // end updatePreview
-    
     private void setPreview(GridPane pane, Block block) {
+        int numRows = block.getShapeObj().getWidth();
+        int numCols = block.getShapeObj().getHeight();
+        Rectangle square;
+        boolean[][] shape = block.getShape();
         
+        for(int r = 0; r < numRows; r ++) {
+            for(int c = 0; c < numCols; c ++) {
+                if(shape[r][c]) // if there is a square in this index
+                    square = squares[block.getColorNum()];
+                    
+                else // otherwise there is no square
+                    square = squares[squares.length - 1];
+                
+                pane.add(square, r, c);
+            } // end for
+        } // end for
     } // end setPreview
     
     private void setBoardPane(GridPane pane) {
-        // TODO
+        // filling pane with white squares first
+        for(int r = 0; r < Board.ROWS; r ++) {
+            for(int c = 0; c < Board.COLS; c ++) {
+                pane.add(squares[squares.length - 1], r, c);
+            } // end for
+        } // end for
+        
+        // adding the colored squares onto the pane
+        int blocks = board.getBlocks();
+        
+        for(int i = 0; i < blocks.length; i ++) { // for each block
+            if(blocks[i] == null)
+                break;
+            
+            int points = blocks[i].getPoints();
+            // TODO currently assuming points that aren't there anymore are set to -1 ...
+            for(int j = 0; j < POINTS_ARR_LEN; j += 2) { // for each point in the block
+                if(points[j] == -1)
+                    break;
+                
+                pane.add(squares[blocks[i].getColorNum()], points[j], points[j + 1]);
+            } // end for
+        } // end for
     } // end setBoardPane
+    
+    private boolean isAtBottom(Block b) {
+        int maxY = -1;
+        
+        // finding the largest y value among the points in block b. (This means they are on the "bottom" of the block.)
+        for(int i = 1; i < POINTS_ARR_LEN; i += 2) {
+            int currentY = b.getPoints()[i];
+            
+            if(currentY > maxY)
+                maxY = currentY;
+        } // end for
+        
+        // finding the other points with a y value the same as the maximum y value and checking to see if any of the bottom points have a square below them
+        for(int i = 0; i < POINTS_ARR_LEN; i += 2) {
+            int currentX = b.getPoints()[i];
+            int currentY = b.getPoints()[i + 1];
+            
+         // this is a bottom point and there is a square below it on the board (or the board bottom)
+            if(currentY == maxY && (board[currentX][currentY + 1] || currentY == Board.ROWS - 1)) 
+                return true;
+        } // end for
+        
+        return false;
+    } // end isAtBottom
     
     public void setSpeedMultiplier(double multiplier) {
         speedMultiplier = multiplier;
