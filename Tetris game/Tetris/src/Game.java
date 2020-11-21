@@ -21,11 +21,11 @@ import javafx.animation.*;
 import javafx.event.*;
 
 public class Game {
-    private final KeyCode LEFT = KeyCode.LEFT;
-    private final KeyCode RIGHT = KeyCode.RIGHT;
-    private final KeyCode DROP = KeyCode.DOWN;
-    private final KeyCode ROTATE_RIGHT = KeyCode.Z;
-    private final KeyCode ROTATE_LEFT = KeyCode.X;
+    private final static KeyCode ROTATE_RIGHT = KeyCode.Z;
+    private final static KeyCode ROTATE_LEFT = KeyCode.X;
+    private final static KeyCode LEFT = KeyCode.LEFT;
+    private final static KeyCode RIGHT = KeyCode.RIGHT;
+    private final static KeyCode DROP = KeyCode.DOWN;
     
     private final int FALL_SPEED = 500; // default fall speed for the blocks in ms
     private int dropSpeed;
@@ -103,27 +103,6 @@ public class Game {
         rightPane.setAlignment(Pos.TOP_RIGHT);
         rightPane.setPrefWidth(SIDE_PANE_WIDTH);
         
-        // EVENT HANDLERS
-        // moving block left
-        
-        // moving block right
-        
-        // dropping block
-        
-        // rotating block left
-        
-        // rotating block right
-        
-        // automatic falling blocks handler
-        EventHandler<ActionEvent> blockFallingHandler = e -> {
-            if(!isAtBottom(board.getCurrent())) { // if the block is not at a bottom (i.e. resting on another block or at the board bottom)
-                // move it down by one row
-                int currentX = board.getCurrent().getPoints[0];
-                int newY = board.getCurrent().getPoints[1];
-                board.getCurrent().updatePoints(currentX, newY);
-            } // end if
-        };
-        
         // BLOCKS WILL FALL AUTOMATICALLY ...
         // ... until they reach the bottom of the board.
         Timeline blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED), blockFallingHandler));
@@ -148,12 +127,118 @@ public class Game {
         // set the second preview to the block after the first preview
         setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
         
-        // MAIN PANE AND SCENE GUI
+        // MAIN PANE
         HBox mainPane = new HBox(GameLauncher.ITEM_SPACING, leftPane, boardPane, rightPane);
-        Scene scene = new Scene(mainPane, GameLauncher.WINDOW_WIDTH, GameLauncher.WINDOW_HEIGHT);
         
+        // EVENT HANDLERS
+        mainPane.setOnKeyPressed(e -> {
+            KeyCode key = e.getCode();
+            Block current = board.getCurrent();
+            
+            if(key == LEFT || key == RIGHT || key == Game.DROP || key == Game.ROTATE_LEFT || key == Game.ROTATE_RIGHT) {
+                setBoardArray(current, false); // specifying that where the block currently is on the board is empty
+                
+                switch (key) {
+                    case LEFT: // moving block left
+                        if(isValidMove(current, key)) 
+                            current.moveLeft();
+                        break;
+                        
+                    case RIGHT: // moving block right
+                        if(isValidMove(current, key)) 
+                            current.moveRight();
+                        break;
+                        
+                    case DOWN: // dropping block
+                        if(!isAtBottom(board.getCurrent())) 
+                            moveDownOne(board.getCurrent());
+                        break;
+                        
+                    case Z: // rotating block left
+                        if(isValidMove(current, key))
+                            current.moveLeft();
+                        break;
+                        
+                    case X: // rotating block right
+                        if(isValidMove(current, key))
+                            current.moveRight();
+                        break;
+                } // end switch
+                
+                setBoardArray(current, true); // changing the place that the block occupies on the board array
+            } // end if
+        });
+        
+        // automatic falling blocks handler
+        EventHandler<ActionEvent> blockFallingHandler = e -> {
+            if(!isAtBottom(board.getCurrent())) { // if the block is not at a bottom (i.e. resting on another block or at the board bottom)
+                // move it down by one row
+                moveDownOne(board.getCurrent());
+            } // end if
+        };
+        
+        // SCENE SETUP
+        Scene scene = new Scene(mainPane, GameLauncher.WINDOW_WIDTH, GameLauncher.WINDOW_HEIGHT);
         stage.setScene(scene);
     } // end playGame
+    
+    private void moveDownOne(Block b) {
+        int currentX = b.getPoints[0];
+        int newY = b.getPoints[1];
+        b.updatePoints(currentX, newY);
+    } // end moveDownOne
+    
+    private void setBoardArray(Block b, boolean occupied) {
+        int[] points = b.getPoints();
+        
+        for(int i = 0; i < points.length; i += 2) {
+            board.getBoard()[i][i + 1] = occupied;
+        } // end for
+    } // end updateBoard
+    
+    private boolean isValidMove(Block b, KeyCode move) {
+        BlockColor bColor = new BlockColor(b.getColorNum());
+        Shape bShape = b.getShapeObj();
+        int[] bPoints = b.getPoints();
+        Block testBlock = new Block(bColor, bShape, bPoints[0], bPoints[1], b.getOrientation()); // create a copy of the block to test rotate
+        int[] testPoints = testBlock.getPoints();
+        
+        // performing the move on the test block
+        switch (move) {
+            case LEFT: // move left
+                testBlock.moveLeft();
+                break;
+                
+            case RIGHT: // move right
+                testBlock.moveRight();
+                break;
+                
+            case Z: // rotate left
+                testBlock.rotateLeft();
+                break;
+                
+            case X: // rotate right
+                testBlock.rotateRight();
+                break;
+                
+            default:
+                return false;
+        } // end switch
+        
+        // checking to see if the move resulted in valid points
+        for(int i = 0; i < testPoints.length; i += 2) {
+            int x = testPoints[i];
+            int y = testPoints[i + 1];
+            
+            if(!(x >= 0 && x < Board.ROWS && y >= 0 && y < Board.COLS)) // not within bounds of the board
+                return false;
+            
+            if(!(board.getBoard()[x][y])) // overlapping with any other blocks
+                return false;
+        } // end for
+        
+        return true;
+    } // end isValidBlock
     
     private void setPreview(GridPane pane, Block block) {
         int numRows = block.getShapeObj().getWidth();
