@@ -9,19 +9,18 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import java.util.*;
 
 public class ShapeTest {
-    Shape shape1, shape2, shape3;
-    Shape o1, i1, s1, z1, l1, j1, t1;
-    Shape o2, i2, s2, z2, l2, j2, t2;
+    static Shape shape1, shape2, shape3;
+    static Shape o1, i1, s1, z1, l1, j1, t1;
+    static Shape o2, i2, s2, z2, l2, j2, t2;
     
     boolean[][][][] allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         shape1 = new Shape();
         shape2 = new Shape('J', 0);
         shape3 = new Shape('j', 2);
@@ -55,7 +54,7 @@ public class ShapeTest {
         
         for(int i = 0; i < Shape.NUM_SHAPES; i++) {
             for(int j = 0; j < allShapes[i].length; j++) {
-                if(allShapes[i][j] == shape.getShape()) {
+                if(allShapes[i][j] == shape1.getShape()) {
                     sameArray = true;
                     break;
                 } // end if
@@ -72,10 +71,12 @@ public class ShapeTest {
         
         for(int i = 0; i < Shape.NUM_SHAPES; i++) {
             for(int j = 0; j < allShapes[i].length; j++) {
-                if(Arrays.equals(allShapes[i][j], shape1.getShape())) {
-                    sameElements = true;
-                    break;
-                } // end if
+                for(int k = 0; k < allShapes[i][j].length && k < shape1.getShape().length; k++) {
+                    if(Arrays.equals(allShapes[i][j][k], shape1.getShape()[k])) {
+                        sameElements = true;
+                        break;
+                    } // end if
+                } // end for
             } // end for
         } // end for
         
@@ -243,27 +244,27 @@ public class ShapeTest {
     void testSetShape1() {
         s1.setShape('z', 2);
         
-        assertEquals(Shape.Z[2], s1.getShape());
+        assertArrayEquals(Shape.Z[2], s1.getShape());
     } 
     
     @Test
     void testSetShape2() {
         s1.setShape('Z', 1);
         
-        assertEquals(Shape.Z[1], s1.getShape());
+        assertArrayEquals(Shape.Z[1], s1.getShape());
     } 
     
     @Test
     void testSetShape3() {
         s1.setShape(3);
         
-        assertEquals(Shape.Z[3], s1.getShape());
+        assertArrayEquals(Shape.S[3], s1.getShape());
     } 
     
     @Test
     void testGetShape() {
-        z.setShape(3);
+        z1.setShape(3);
         
-        assertEquals(Shape.Z[3], z.getShape());
+        assertArrayEquals(Shape.Z[3], z1.getShape());
     } 
 } // end ShapeTest
