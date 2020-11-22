@@ -7,17 +7,16 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 class ScoreTest {
     // variables to be used with testing
-    Score s1, s2;
+    static Score s1, s2;
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         // initialize variables
-        s1 = new Score(); // TODO currently expects the constructor to initialize the score to zero
+        s1 = new Score();
         s2 = new Score();
     } // end setup
     
