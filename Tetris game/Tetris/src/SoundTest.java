@@ -7,17 +7,19 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import javafx.embed.swing.JFXPanel;
 
 class SoundTest {
-    Sound s1, s2;
-    double tolerance;
+    static Sound s1, s2;
+    static double tolerance;
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
+        new JFXPanel(); // had to use this to get the tests to work (otherwise JavaFX toollkit was not initialized)
+        
         // initialize variables
-        s1 = new Sound(); // TODO currently expects the constructor to initialize the sound to 0.5
+        s1 = new Sound(); // currently expects the constructor to initialize the sound to 0.25
         s2 = new Sound(0.99);
         
         tolerance = 0.01; // margin of error expected for the volume since we are adding/multiplying doubles
@@ -25,7 +27,7 @@ class SoundTest {
     
     @Test
     void testDefaultConstructor() {
-        assertEquals(0.5, s1.getVolume());
+        assertEquals(0.25, s1.getVolume());
     } // end testSoundConstructor
     
     @Test
@@ -37,14 +39,15 @@ class SoundTest {
     void testIncreaseVolume() {
         s1.increaseVolume();
         
-        assertEquals(s1.VOLUME_CHANGE_AMOUNT, s1.getVolume(), tolerance);
+        assertEquals(s1.VOLUME_CHANGE_AMOUNT + 0.25, s1.getVolume(), tolerance);
     } // end testIncreaseVolume
     
     @Test
     void testDecreaseVolume() {
-        s1.decreaseVolume();
+        Sound s = new Sound();
+        s.decreaseVolume();
         
-        assertEquals(0, s1.getVolume(), tolerance);
+        assertEquals(0.15, s.getVolume(), tolerance);
     } // end testDecreaseVolume
 
 }
