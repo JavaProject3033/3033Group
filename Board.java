@@ -1,8 +1,11 @@
 package board;
 
+import java.util.*;
+import javafx.geometry.Point2D; 
+
 public class Board 
 {
-    final int ROWS = 20;
+    final int ROWS = 10;
     final int COLS = 10;
     final int MAX_BLOCKS = ROWS * COLS / 4;
     boolean board[][];
@@ -27,7 +30,7 @@ public class Board
         */ 
         board = new boolean[ROWS][COLS];
         blocks = new Block[MAX_BLOCKS];
-        futureBlocks = new futureBlocks[Shape.NUM_SHAPES];
+        futureBlocks = new Block[Shape.NUM_SHAPES];
         normalBlockSpeed = 0;
         dropBlockSpeed = 0;
         squareSideLength = 0;
@@ -47,7 +50,7 @@ public class Board
         */
         board = new boolean[ROWS][COLS];
         blocks = new Block[MAX_BLOCKS];
-        futureBlocks = new futureBlocks[Shape.NUM_SHAPES];
+        futureBlocks = new Block[Shape.NUM_SHAPES];
         normalBlockSpeed = normalSpeed;
         dropBlockSpeed = dropSpeed;
         squareSideLength = sideLen;
@@ -63,7 +66,7 @@ public class Board
 	Use this method when block hits the other stationary blocks
         */
         for(int i=0; i<ROWS; i++) {
-            //check for row with all true and same color
+            //check for row with all true
             boolean allFilled = true;
             
             for(int j=0; j<COLS; j++){
@@ -74,6 +77,10 @@ public class Board
             }
             
             if(allFilled){
+                for(int j=0; j<COLS; j++){
+                    board[i][j] = false;
+                }
+                
                 moveBlocksDown();
             }
         }
@@ -81,11 +88,31 @@ public class Board
     
     void clearColors()
     {
+        // Board is array of boolean. how to check the color
+        // 
+        
         /*
         Checks for and clears color clusters
 	May be helpful to use moveBlocksDown()
 	Use this method when block hits the other stationary blocks
         */
+        ArrayList<Point2D> colorCluster = new ArrayList<Point2D>();
+        
+        //Check same color in same row
+        for(int i=0; i<ROWS-2; i++) {
+            for(int j=0; j<COLS-2; j++){
+                if(board[i][j] && board[i][j+1] && board[i][j+2]) {
+                    
+                }
+            }
+        }
+        
+        //Check same color in same column
+        for(int i=0; i<ROWS; i++) {
+            for(int j=0; j<COLS; j++){
+                
+            }
+        }
     }
     
     void nextBlock()
@@ -105,15 +132,13 @@ public class Board
         currentBlockIndex++;
     }
     
-    boolean isValidLocation(int x, int y)
-    {
-        // need more information on Point2D class
-        
+    boolean isValidLocation(Point2D loc)
+    {      
         /*
         Checks to see if a point is on the board
 	Use this to check if a user’s move would be valid or not
         */    
-        if(x<0 || x>9 || y<0 || y>9)
+        if(loc.getX()<0 || loc.getX()>9 || loc.getY()<0 || loc.getY()>9)
             return false;
         else
             return true;
@@ -121,8 +146,6 @@ public class Board
     
     void generateNewFutureBlocks()
     {
-        // Need more information about shape class, 
-        // the shapes and color of the blocks
         /*
         Generates new blocks for the futureBlocks array.
 	To make the game play more balanced:
@@ -130,6 +153,37 @@ public class Board
         	All colors should be used at least once
         	The order and color-block assignment should be random
         */
+        Random randShape = new Random();
+        Random randPoint = new Random();
+        Random randOrientiation = new Random();
+        
+        ArrayList<Shape> shapeList= new ArrayList<Shape>();
+        shapeList.add(new Shape('o', randShape.nextInt(4)));
+        shapeList.add(new Shape('i', randShape.nextInt(4)));
+        shapeList.add(new Shape('s', randShape.nextInt(4)));
+        shapeList.add(new Shape('z', randShape.nextInt(4)));
+        shapeList.add(new Shape('l', randShape.nextInt(4)));
+        shapeList.add(new Shape('j', randShape.nextInt(4)));
+        shapeList.add(new Shape('t', randShape.nextInt(4)));
+        
+        ArrayList<BlockColor> blockColourList = new ArrayList<BlockColor>();
+        blockColourList.add(new BlockColor(0));
+        blockColourList.add(new BlockColor(1));
+        blockColourList.add(new BlockColor(2));
+        blockColourList.add(new BlockColor(3));
+        blockColourList.add(new BlockColor(4));
+        blockColourList.add(new BlockColor(5));
+        blockColourList.add(new BlockColor(6));
+        
+        Collections.shuffle(shapeList);
+        Collections.shuffle(blockColourList);
+        
+        for(int i=0; i<futureBlocks.length; i++)
+        {
+            futureBlocks[i] = new Block(blockColourList.get(i), shapeList.get(i),
+                                    new Point2D(randPoint.nextInt(20), randPoint.nextInt(20)), 
+                                    randOrientiation.nextInt(4));
+        }
     }
     
     void moveBlocksDown()
@@ -139,17 +193,59 @@ public class Board
         If a block is not touching the bottom or attached somewhere to another 
         block, it should “fall” down until it is resting on something
         */
-        // TODO
-    }
-    
+        //Clear floating row
+        boolean blankRow =  false;
+        
+        for(int i=ROWS-1; i>=0; i--) {
+            blankRow = true;
+            
+            for(int j=0; j<COLS; j++){
+                if(board[i][j] == true){ 
+                    blankRow = false;
+                    break;
+                }
+            }
+            
+            if(blankRow){
+                for(int row=i; row>0; row--) {
+                    for(int col=0; col<COLS; col++)
+                        board[row][col] = board[row-1][col];
+                }
+                
+                for(int j=0; j<COLS; j++)
+                    board[0][j] = false;                                                
+            }
+        }              
+    }    
     
     void removeBlankBlocks()
     {
-        // Need more information about the shape of the block from Block class
         /*
             Checks the blocks array and removes any blocks whose shapes are 
             completely false 
-        */        
+        */   
+        boolean validShape = false;  
+        ArrayList<Block> validBlocks = new ArrayList<Block>();
+        
+        for(int i=0; i<blocks.length; i++) {
+            validShape = false;
+            Shape shape = blocks[i].getShape();
+            boolean[][] shapeArray = shape.getShape();
+            
+            for(int x=0; x<shapeArray.length; x++) {
+                for(int y=0; y<shapeArray[x].length; y++) {
+                    if(shapeArray[x][y] == true) {
+                        validShape = true;
+                    }
+                }
+            }
+            
+            if(validShape)
+                validBlocks.add(blocks[i]);
+            }
+        
+        blocks = new Block[validBlocks.size()];
+        blocks = validBlocks.toArray(blocks);
     }
         
     // getters/setters for non-final variables
