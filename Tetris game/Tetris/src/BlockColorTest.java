@@ -6,16 +6,15 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 class BlockColorTest {
     BlockColor bc1, bc2;
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         bc1 = new BlockColor();
-        bc2 = new BlockColor(3)
+        bc2 = new BlockColor(3);
     } // end setup
     
     @Test
@@ -25,7 +24,7 @@ class BlockColorTest {
    
     @Test
     void testDefaultConstructor2() {
-        assertEquals(BlockColor.COLORS, BlockColor.currentColors);
+        assertEquals(BlockColor.COLORS, BlockColor.getCurrentColors());
     } 
     
     @Test
@@ -49,15 +48,16 @@ class BlockColorTest {
         assertFalse(bc1.isEqual(bc2));
     } 
     
+    /** Removed color blind mode due to time constraints
     @Test
     void testToggleColorblindMode1() {
-        assertEquals(BlockColor.COLORBLIND_COLORS, BlockColor.currentColors);
+        assertEquals(BlockColor.COLORBLIND_COLORS, BlockColor.getCurrentColors());
     } 
     
     @Test
     void testToggleColorblindMode2() {
-        assertEquals(BlockColor.COLORS, BlockColor.currentColors);
-    } 
+        assertEquals(BlockColor.COLORS, BlockColor.getCurrentColors());
+    } **/
     
     @Test
     void testGetColor() {
