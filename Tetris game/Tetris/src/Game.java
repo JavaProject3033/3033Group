@@ -21,11 +21,11 @@ import javafx.animation.*;
 import javafx.event.*;
 
 public class Game {
-    private final static KeyCode ROTATE_RIGHT = KeyCode.Z;
-    private final static KeyCode ROTATE_LEFT = KeyCode.X;
-    private final static KeyCode LEFT = KeyCode.LEFT;
-    private final static KeyCode RIGHT = KeyCode.RIGHT;
-    private final static KeyCode DROP = KeyCode.DOWN;
+    public final static KeyCode ROTATE_RIGHT = KeyCode.Z;
+    public final static KeyCode ROTATE_LEFT = KeyCode.X;
+    public final static KeyCode LEFT = KeyCode.LEFT;
+    public final static KeyCode RIGHT = KeyCode.RIGHT;
+    public final static KeyCode DROP = KeyCode.DOWN;
     
     private final int FALL_SPEED = 500; // default fall speed for the blocks in ms
     private int dropSpeed;
@@ -105,7 +105,25 @@ public class Game {
         
         // BLOCKS WILL FALL AUTOMATICALLY ...
         // ... until they reach the bottom of the board.
-        Timeline blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED), blockFallingHandler));
+        // automatic falling blocks handler
+        Timeline blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED * speedMultiplier), e -> {
+            moveDownOne(board.getCurrent());
+            
+            // increase speed of blocks once certain score thresholds have been met
+            if(score.getScore() == 30) 
+                speedMultiplier = 1.25;
+            
+            if(score.getScore() == 50)
+                speedMultiplier = 1.5;
+            
+            if(score.getScore() == 70)
+                speedMultiplier = 2;
+            
+            if(score.getScore() == 90)
+                speedMultiplier = 2.5;
+        }));
+        
+        blockFallingTimeline.play();
         
         // check for rows and colors to clear
         board.clearRow();
@@ -118,7 +136,8 @@ public class Game {
         // TODO may may not need this if the clear colors and stuff does this...
         
         // put the next block on the board
-        board.nextBlock();
+        board.nextBlock(); 
+        score.increaseScore(1); // increase score by 1 for every block that the user gets on the board
         
         // update the preview panes
         // set the first preview to the block after the current block in the futureBlocks array
@@ -150,8 +169,7 @@ public class Game {
                         break;
                         
                     case DOWN: // dropping block
-                        if(!isAtBottom(board.getCurrent())) 
-                            moveDownOne(board.getCurrent());
+                        moveDownOne(board.getCurrent());
                         break;
                         
                     case Z: // rotating block left
@@ -163,32 +181,29 @@ public class Game {
                         if(isValidMove(current, key))
                             current.moveRight();
                         break;
+                        
+                    default:
+                        break;
                 } // end switch
                 
                 setBoardArray(current, true); // changing the place that the block occupies on the board array
             } // end if
         });
         
-        // automatic falling blocks handler
-        EventHandler<ActionEvent> blockFallingHandler = e -> {
-            if(!isAtBottom(board.getCurrent())) { // if the block is not at a bottom (i.e. resting on another block or at the board bottom)
-                // move it down by one row
-                moveDownOne(board.getCurrent());
-            } // end if
-        };
-        
         // SCENE SETUP
         Scene scene = new Scene(mainPane, GameLauncher.WINDOW_WIDTH, GameLauncher.WINDOW_HEIGHT);
         stage.setScene(scene);
     } // end playGame
     
-    private void moveDownOne(Block b) {
-        int currentX = b.getPoints[0];
-        int newY = b.getPoints[1];
-        b.updatePoints(currentX, newY);
+    public void moveDownOne(Block b) {
+        if(!isAtBottom(b)) {
+            int currentX = b.getPoints[0];
+            int newY = b.getPoints[1];
+            b.updatePoints(currentX, newY);
+        } // end if
     } // end moveDownOne
     
-    private void setBoardArray(Block b, boolean occupied) {
+    public void setBoardArray(Block b, boolean occupied) {
         int[] points = b.getPoints();
         
         for(int i = 0; i < points.length; i += 2) {
@@ -196,7 +211,7 @@ public class Game {
         } // end for
     } // end updateBoard
     
-    private boolean isValidMove(Block b, KeyCode move) {
+    public boolean isValidMove(Block b, KeyCode move) {
         BlockColor bColor = new BlockColor(b.getColorNum());
         Shape bShape = b.getShapeObj();
         int[] bPoints = b.getPoints();
@@ -268,7 +283,7 @@ public class Game {
         } // end for
         
         // adding the colored squares onto the pane
-        int blocks = board.getBlocks();
+        Block[] blocks = board.getBlocks();
         
         for(int i = 0; i < blocks.length; i ++) { // for each block
             if(blocks[i] == null)
@@ -285,7 +300,7 @@ public class Game {
         } // end for
     } // end setBoardPane
     
-    private boolean isAtBottom(Block b) {
+    public boolean isAtBottom(Block b) {
         int maxY = -1;
         
         // finding the largest y value among the points in block b. (This means they are on the "bottom" of the block.)
