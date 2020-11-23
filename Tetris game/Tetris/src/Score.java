@@ -57,5 +57,7 @@ public class Score {
     }
     */
 
-
+    public int getHighScore() {
+        return highScore;
+    }
 }
