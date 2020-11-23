@@ -11,6 +11,7 @@ import javafx.scene.*;
 import javafx.stage.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
+import javafx.scene.web.*;
 
 public class GameLauncher extends Application {
     public static final double ITEM_SPACING = 10;
@@ -37,6 +38,11 @@ public class GameLauncher extends Application {
         
         // options button
         Button optionsButton = new Button("Options");
+        
+        // credit for music
+        WebView browser = new WebView();
+        WebEngine engine = browser.getEngine();
+        Hyperlink musicCreditLink = new Hyperlink("Music created by Bogozi");
         
         VBox titlePane = new VBox(ITEM_SPACING, gameNameLabel, highScoreLabel);
         titlePane.setAlignment(Pos.CENTER);
@@ -114,6 +120,10 @@ public class GameLauncher extends Application {
         playAgainButton.setOnAction(e -> {
             game = new Game();
             game.playGame(stage, endScene);
+        });
+        
+        musicCreditLink.setOnAction(e -> {
+            engine.load("https://commons.wikimedia.org/wiki/File:Tetris_theme.ogg");
         });
         
         stage.show();
