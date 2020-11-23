@@ -9,16 +9,16 @@
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
-import junit.framework.Assert;
+import org.junit.jupiter.api.*;
+import javafx.scene.paint.*;
 
 public class BoardTest {
     Board b1, b2;
     
     boolean[][][][] allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         b1 = new Board();
         b2 = new Board(1, 2, 30);
     } // end setup
@@ -106,12 +106,12 @@ public class BoardTest {
     @Test
     void testConstructor3() {
         // uses helper function; see bottom of the page
-        assertTrue(isValidFutureBlocks(b2));
+        assertTrue(checkFutureBlocks(b2));
     }
     
     @Test
     void testConstructor4() {
-        assertEquals(1, b2.getNormalSpeed());
+        assertEquals(1, b2.getNormalBlockSpeed());
     } 
     
     @Test
@@ -147,6 +147,7 @@ public class BoardTest {
     @Test
     void testClearRow2() {
         Board after = new Board(1, 2, 30); // this one is hard to test . . .
+        Block[] blocks = after.getBlocks();
         after.getBoard()[17][3] = true; // so I'm trying to test certain aspects to see if it matches up
         after.getBoard()[17][9] = true; // setting the expected board values up
         after.getBoard()[18][3] = true;
@@ -159,7 +160,7 @@ public class BoardTest {
         
         // checking to see if the expected color values are there
         int[] colorCount = {0, 0, 0}; // doing this by counting the number of occurrences of each color to see if it matches
-        BlockColor blockColor;
+        Color blockColor;
         
         for(int i = 0; i < blocks.length; i++) {
             blockColor = blocks[i].getColor();
@@ -190,16 +191,27 @@ public class BoardTest {
         Board b4 = generateb4();
         b4.clearRow();
         
-        assertArrayEquals(after.getBoard(), b4);
+        // comparing each row in the after object to each row in the board of b4; should be equal in terms of content (likely not the same address)
+        for(int r = 0; r < after.getBoard().length; r++) {
+            assertArrayEquals(b4.getBoard()[r], after.getBoard()[r]);
+        } // end for
+        
+        // automatically passes if it reaches this point
     }
     
     // no blocks with touching colors; should be no change
     @Test
     void testClearColor1() {
         Board b3 = generateb3(); 
-        b3.clearColor();
+        b3.clearColors();
+        Board expected = generateb3();
+
+        // comparing each row in the after object to each row in the board of b4; should be equal in terms of content (likely not the same address)
+        for(int r = 0; r < expected.getBoard().length; r++) {
+            assertArrayEquals(b3.getBoard()[r], expected.getBoard()[r]);
+        } // end for
         
-        assertArrayEquals(generateb3().getBoard(), b3.getBoard());
+        // automatically passes if it reaches this point
     }
     
     // should clear all the touching colors (3+ touching blocks) on the board
@@ -210,10 +222,15 @@ public class BoardTest {
         after.addBlock(new Block(new BlockColor(2), new Shape('t', 0), 18, 6, 0));
         after.addBlock(new Block(new BlockColor(2), new Shape('j', 3), 17, 9, 3));
         
-        Block b4 = generateb4();
-        b4.clearColor();
+        Board b4 = generateb4();
+        b4.clearColors();
         
-        assertArrayEquals(after.getBoard(), b4);
+        // comparing each row in the after object to each row in the board of b4; should be equal in terms of content (likely not the same address)
+        for(int r = 0; r < after.getBoard().length; r++) {
+            assertArrayEquals(b4.getBoard()[r], after.getBoard()[r]);
+        } // end for
+        
+        // automatically passes if it reaches this point
     }
     
     @Test
@@ -227,7 +244,7 @@ public class BoardTest {
     }
     
     @Test
-    void testNextBlock2()) {
+    void testNextBlock2() {
         Board b = new Board(1, 2, 30);
         int next = 2;
         
@@ -255,7 +272,7 @@ public class BoardTest {
         
         b.nextBlock();
         
-        int next = b.getFutureBlocks[0];
+        Block next = b.getFutureBlocks()[0];
         
         assertEquals(next, b.getCurrent());
     }
@@ -318,18 +335,22 @@ public class BoardTest {
     @Test
     void testGenerateNewFutureBlocks1() {
         Board b = new Board(1, 2, 30);
-        Block currentBlocks = b.getFutureBlockks();
+        Block[] currentBlocks = b.getFutureBlocks();
         
         b.generateNewFutureBlocks();
         
-        assertArrayNotEquals(currentBlocks, b.getFutureBlocks());
+        for(int i = 0; i < currentBlocks.length; i++) {
+            assertNotEquals(currentBlocks[i], b.getFutureBlocks()[i]);
+        } // end for
+        
+        // automatically passes if it reaches this point
     }
     
     // checking that all blocks and colors are used at least once
     @Test
     void testGenerateNewFutureBlocks2() {
         Board b = new Board(1, 2, 30);
-        b.generateNewFutureBlocks()
+        b.generateNewFutureBlocks();
         
         assertTrue(checkFutureBlocks(b));
     }
@@ -359,13 +380,14 @@ public class BoardTest {
         b.moveBlocksDown();
         
         // checking if there is a block at 15,7; if so, the block should have the characteristics (other than location) as the specified block above
-        if(b.getBoard[15][7]) {
+        if(b.getBoard()[15][7]) {
             for(int i = 0; i < b.getBlocks().length; i++) { // finding the block that is at 15,7 (should be where the floating one fell to)
                 Block current = b.getBlocks()[i];
+                int[] currentPoints = current.getPoints();
                 
                 // seeing if the block is the same block that was floating
-                if(current.getX() == 15 && current.getY() == 7) {
-                    pass = current.isSameColor(floating) && Arrays.equals(current, floating);
+                if(currentPoints[0] == 15 && currentPoints[1] == 7) {
+                    pass = current.isSameColor(floating) && current.equals(floating);
                 } 
             } // end for
         } // end if
@@ -377,7 +399,7 @@ public class BoardTest {
     @Test
     void testRemoveBlankBlocks1() {
         Board b = generateb3();
-        Block oldBlocksArr = Arrays.copyOf(b.getBlocks());
+        Block[] oldBlocksArr = Arrays.copyOf(b.getBlocks(), b.getBlocks().length);
         
         b.removeBlankBlocks();
         
@@ -396,7 +418,7 @@ public class BoardTest {
         b.addBlock(partialBlank);
         
         // making the blank block full of blanks
-        boolean[][] shapeArr = b.getShape();
+        boolean[][] shapeArr = blank.getShape();
         for(int i = 0; i < shapeArr.length; i++) { // for each row in the blank block
             Arrays.fill(shapeArr[i], false);
         } // end for
@@ -413,12 +435,12 @@ public class BoardTest {
         b.getBoard()[18][0] = false;
         
         // checking the blocks array to see if it got rid of the blank block but kept the partialBlank block
-        boolean[][] blocksArr = b.getBlocks();
+        Block[] blocksArr = b.getBlocks();
         for(int i = 0; i < blocksArr.length; i++) {
             Block current = blocksArr[i];
             
             if(current == blank) {
-                notContainBlock = false;
+                notContainBlank = false;
             } // end if
             
             if(current == partialBlank) {
@@ -432,21 +454,22 @@ public class BoardTest {
     @Test
     void testAddBlock1() {
         boolean successfulAdd = true;
-        Block b = generateb4();
+        Board b = generateb4();
         Block added = new Block(new BlockColor(0), new Shape('o', 0), 0, 0, 0);
         
         b.addBlock(added);
         
         // checking to see if the block was added to the board
-        successfulAdd = b.getBoard[0][0] && b.getBoard[0][1] && b.getBoard[1][0] && b.getBoard[1][1];
+        successfulAdd = b.getBoard()[0][0] && b.getBoard()[0][1] && b.getBoard()[1][0] && b.getBoard()[1][1];
         
         // checking to see if the block was added to the block list
-        Blocks[] blocksArr = b.getBlocks();
+        Block[] blocksArr = b.getBlocks();
         for(int i = 0; i < blocksArr.length; i ++) {
             Block current = blocksArr[i];
+            int[] points = current.getPoints();
             
-            if(current.getX() == 0 && current.getY() == 0) { // if the block at 0,0 matches the added block in the other characteristics
-                successfulAdd = current.isSameColor(added) && Arrays.equals(current, added);
+            if(points[0] == 0 && points[1] == 0) { // if the block at 0,0 matches the added block in the other characteristics
+                successfulAdd = current.isSameColor(added) && current.equals(added);
             } // end if
         } // end for
         
@@ -462,13 +485,14 @@ public class BoardTest {
         b.removeBlock(removed);
         
         // checking to see if the block was actually removed
-        succeessfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
+        successfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
         
-        Block blocksArr = b.getBlocks();
+        Block[] blocksArr = b.getBlocks();
         for(int i = 0; i < blocksArr.length; i ++) {
             Block current = blocksArr[i];
+            int[] points = current.getPoints();
             
-            if(current.getX() == 14 && current.getY() == 8) { // if the block at 0,0 matches the added block in the other characteristics
+            if(points[0] == 14 && points[1] == 8) { // if the block at 0,0 matches the added block in the other characteristics
                 successfullyRemoved = false;
             } // end if
         } // end for
@@ -480,7 +504,7 @@ public class BoardTest {
     @Test
     void testRemoveBlock2() {
         Board b = new Board();
-        Blocks[] expected = b.getBlocks();
+        Block[] expected = b.getBlocks();
         Block randomBlock = new Block();
         
         b.removeBlock(randomBlock);
@@ -492,7 +516,7 @@ public class BoardTest {
     @Test
     void testRemoveBlock3() {
         Board b = generateb3();
-        Blocks[] expected = b.getBlocks();
+        Block[] expected = b.getBlocks();
         Block randomBlock = new Block();
         
         b.removeBlock(randomBlock);
@@ -509,13 +533,14 @@ public class BoardTest {
         b.removeBlock(14, 8);
         
         // checking to see if the block was actually removed
-        succeessfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
+        successfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
         
-        Block blocksArr = b.getBlocks();
+        Block[] blocksArr = b.getBlocks();
         for(int i = 0; i < blocksArr.length; i ++) {
             Block current = blocksArr[i];
+            int[] points = current.getPoints();
             
-            if(current.getX() == 14 && current.getY() == 8) { // if the block at 0,0 matches the added block in the other characteristics
+            if(points[0] == 14 && points[1] == 8) { // if the block at 14, 8 matches the added block in the other characteristics
                 successfullyRemoved = false;
             } // end if
         } // end for
@@ -527,7 +552,7 @@ public class BoardTest {
     @Test
     void testRemoveBlock5() {
         Board b = new Board();
-        Blocks[] expected = b.getBlocks();
+        Block[] expected = b.getBlocks();
         
         b.removeBlock(5, 10);
         
@@ -538,11 +563,154 @@ public class BoardTest {
     @Test
     void testRemoveBlock6() {
         Board b = generateb3();
-        Blocks[] expected = b.getBlocks();
+        Block[] expected = b.getBlocks();
         
         b.removeBlock(5, 5);
         
         assertArrayEquals(expected, b.getBlocks());
+    }
+    
+    // testing the removeBlock(int index) function
+    @Test
+    void testRemoveBlock7() {
+        boolean successfullyRemoved = true;
+        Board b = generateb3();
+        Block removed = new Block(new BlockColor(3), new Shape('j', 3), 14, 8, 3); // assuming that a copy of this block should be at index 5
+        
+        b.removeBlock(5);
+        
+        // checking to see if the block was actually removed
+        successfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
+        
+        Block[] blocksArr = b.getBlocks();
+        for(int i = 0; i < blocksArr.length; i ++) {
+            Block current = blocksArr[i];
+            int[] points = current.getPoints();
+            
+            if(points[0] == 14 && points[1] == 8) { // if the block at 14,8 matches the added block in the other characteristics
+                successfullyRemoved = false;
+            } // end if
+        } // end for
+        
+        assertTrue(successfullyRemoved);
+    }
+    
+    @Test 
+    void testGenerateBlockLocations1() {
+        Board b = new Board(1, 2, 30); // b4: no clearable rows, no clearable colors, no floating blocks
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), 18, 0, 0);
+        Block j1 = new Block(new BlockColor(1), new Shape('j', 3), 16, 3, 3);
+        Block t1 = new Block(new BlockColor(0), new Shape('t', 0), 18, 4, 0);
+        Block t2 = new Block(new BlockColor(2), new Shape('t', 0), 17, 6, 0);
+        Block i = new Block(new BlockColor(0), new Shape('i', 0), 19, 6, 0);
+        Block j2 = new Block(new BlockColor(2), new Shape('j', 3), 16, 9, 3);
+        Block[] blocks = {z, j1, t1, t2, i, j2};
+        
+        for(int k = 0; k < blocks.length; k ++) {
+            b.addBlock(blocks[k]);
+        } // end for
+        
+        Block[][] actualLocations = b.generateBlockLocations();
+        Block[][] expectedLocations = new Block[Board.ROWS][Board.COLS];
+        
+        expectedLocations[0][18] = z;
+        expectedLocations[1][18] = z;
+        expectedLocations[1][19] = z;
+        expectedLocations[2][19] = z;
+        
+        expectedLocations[3][16] = j1;
+        expectedLocations[3][17] = j1;
+        expectedLocations[3][18] = j1;
+        expectedLocations[2][18] = j1;
+
+        expectedLocations[4][18] = t1;
+        expectedLocations[3][19] = t1;
+        expectedLocations[4][19] = t1;
+        expectedLocations[5][19] = t1;
+        
+        expectedLocations[5][18] = t2;
+        expectedLocations[6][17] = t2;
+        expectedLocations[6][18] = t2;
+        expectedLocations[7][18] = t2;
+        
+        expectedLocations[6][19] = i;
+        expectedLocations[7][19] = i;
+        expectedLocations[8][19] = i;
+        expectedLocations[9][19] = i;
+        
+        expectedLocations[8][18] = j2;
+        expectedLocations[9][16] = j2;
+        expectedLocations[9][17] = j2;
+        expectedLocations[9][18] = j2;
+        
+        for(int r = 0; r < Board.ROWS; r ++) {
+            assertArrayEquals(expectedLocations, actualLocations);
+        } // end for
+    }
+    
+    @Test 
+    void testGenerateBlockLocations2() { // no blocks
+        Board b = new Board();
+        Block[][] actualLocations = b.generateBlockLocations();
+        Block[][] expectedLocations = new Block[Board.ROWS][Board.COLS]; // should be all null
+        
+        for(int r = 0; r < Board.ROWS; r ++) {
+            assertArrayEquals(expectedLocations, actualLocations);
+        } // end for
+    }
+    
+    @Test
+    void testGetNeighbors1() {
+        Board b = new Board(1, 2, 30); // b4: no clearable rows, no clearable colors, no floating blocks
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), 18, 0, 0);
+        Block j1 = new Block(new BlockColor(1), new Shape('j', 3), 16, 3, 3);
+        Block t1 = new Block(new BlockColor(0), new Shape('t', 0), 18, 4, 0);
+        Block t2 = new Block(new BlockColor(2), new Shape('t', 0), 17, 6, 0);
+        Block i = new Block(new BlockColor(0), new Shape('i', 0), 19, 6, 0);
+        Block j2 = new Block(new BlockColor(2), new Shape('j', 3), 16, 9, 3);
+        Block[] blocks = {z, j1, t1, t2, i, j2};
+        
+        for(int k = 0; k < blocks.length; k ++) {
+            b.addBlock(blocks[k]);
+        } // end for
+        
+        Block[] expectedNeighbors = {t1, t2, j2};
+        Block[] actualNeighbors = b.getNeighbors(i);
+        
+        assertArrayEquals(expectedNeighbors, actualNeighbors);
+    }
+    
+    @Test
+    void testGetNeighbors2() {
+        Board b = new Board(1, 2, 30); // b4: no clearable rows, no clearable colors, no floating blocks
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), 18, 0, 0);
+        Block j1 = new Block(new BlockColor(1), new Shape('j', 3), 16, 3, 3);
+        Block t1 = new Block(new BlockColor(0), new Shape('t', 0), 18, 4, 0);
+        Block t2 = new Block(new BlockColor(2), new Shape('t', 0), 17, 6, 0);
+        Block i = new Block(new BlockColor(0), new Shape('i', 0), 19, 6, 0);
+        Block j2 = new Block(new BlockColor(2), new Shape('j', 3), 16, 9, 3);
+        Block[] blocks = {z, j1, t1, t2, i, j2};
+        
+        for(int k = 0; k < blocks.length; k ++) {
+            b.addBlock(blocks[k]);
+        } // end for
+        
+        Block[] expectedNeighbors = {z, t1};
+        Block[] actualNeighbors = b.getNeighbors(j1);
+        
+        assertArrayEquals(expectedNeighbors, actualNeighbors);
+    }
+    
+    @Test
+    void testGetNeighbors3() { // no neighbors
+        Board b = new Board();
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), 18, 0, 0);
+        b.addBlock(z);
+        
+        Block[] expectedNeighbors = {};
+        Block[] actualNeighbors = b.getNeighbors(z);
+        
+        assertArrayEquals(expectedNeighbors, actualNeighbors);
     }
     
     // helper functions
@@ -576,7 +744,7 @@ public class BoardTest {
         
         for(int i = 0; i < b.getFutureBlocks().length; i++) { // for every block in futureBlocks
             for(int j = 0; j < BlockColor.COLORS.length; j++) { // for every color
-                if(b.getFutureBlocks()[i].getColor().equals(BlockCOlor.COLORS[j])) { // if the shape's color is equal to the current color
+                if(b.getFutureBlocks()[i].getColor().equals(BlockColor.COLORS[j])) { // if the shape's color is equal to the current color
                     isColorInArray[j] = true;
                 } // end if
             } // end for
