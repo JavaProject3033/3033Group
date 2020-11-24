@@ -1,4 +1,3 @@
-
 public class Shape {
 	private int height;
 	private int width;
