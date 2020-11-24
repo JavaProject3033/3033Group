@@ -1,5 +1,3 @@
-import java.util.Arrays;
-
 import javafx.scene.paint.*;
 
 class Block {
