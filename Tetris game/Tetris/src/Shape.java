@@ -226,7 +226,7 @@ public class Shape {
 			this.currentShape=shape;
 			break;
 		case 'I':
-			arraycopy2D(I[orientation], 0, this.shape, 0, T[orientation].length);
+			arraycopy2D(I[orientation], 0, this.shape, 0, I[orientation].length);
 			this.currentShape=shape;
 			break;
 		case 'l':
