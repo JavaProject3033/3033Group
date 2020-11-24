@@ -20,8 +20,8 @@ class Block {
 		updatePoints(x, y);
 	}
 	
-	int getPoint(int point) {
-		return points[point];
+	int[] getPoint() {
+		return points;
 	}
 	
 	void setPoint(int point, int value) {
@@ -113,6 +113,22 @@ class Block {
 	}
 	
 	private void updatePoints(int newX, int newY) {
-		
+		int height = blockShape.getHeight();
+		int width = blockShape.getWidth();
+		boolean[height][width] currentShape = blockShape.getShape();
+		int currentPoint = 0;
+		for(int i = 0; i < height; i++) {
+			for(int j = 0; j < width; j++) {
+				if(currentShape[i][j]) {
+					points[currentPoint] = j;
+					points[currentPoint+1] = i;
+					currentPoint = currentPoint + 2;
+				}
+			}
+		}
+		for(int k = 7; k > 0; k = k - 2) {
+			points[k] = points[k] + newY - points[1];
+			points[k-1] = points[k-1] + newX - points[0];
+		}
 	}
 }
