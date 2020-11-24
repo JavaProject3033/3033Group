@@ -7,14 +7,16 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
+import org.junit.jupiter.api.*;
 
 class BlockTest {
-    Block b1, i, j, z;
+    static Block b1, i, j, z;
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         b1 = new Block();
         
         i = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1);  
@@ -25,7 +27,7 @@ class BlockTest {
     // color should be initialized to Color.WHITE
     @Test
     void testDefaultConstructor1() {
-        assertEquals(BlockColor.getCurrentColors()[0], b1.getColor());
+        assertEquals(BlockColor.COLORS[0], b1.getColor());
     } 
     
     // initialize to any shape--cannot be null
@@ -49,7 +51,7 @@ class BlockTest {
     
     @Test
     void testConstructor1() {
-        assertEquals(BlockColor.getCurrentColors()[5], i.getColor());
+        assertEquals(BlockColor.COLORS[5], i.getColor());
     }
     
     @Test
@@ -60,10 +62,10 @@ class BlockTest {
     @Test
     void testConstructor3() {
         int[] correctPoints = {
-                0, 1,
-                0, 2,
-                0, 3, 
-                0, 4
+                0, 0,
+                1, 0,
+                2, 0, 
+                3, 0
                 };
         
         assertArrayEquals(correctPoints, i.getPoints());
@@ -76,7 +78,7 @@ class BlockTest {
     
     @Test
     void testGetColor() {
-        assertEquals(BlockColor.getCurrentColors()[2], z.getColor());
+        assertEquals(BlockColor.COLORS[2], z.getColor());
     } 
     
     @Test
@@ -99,7 +101,7 @@ class BlockTest {
     @Test
     void testGetPoints2() {
         int[] correctPoints = {
-                17, 19,
+                17, 9,
                 18, 8,
                 18, 9,
                 19, 8
@@ -117,14 +119,14 @@ class BlockTest {
     void testSetColor1() {
         b1.setColor(new BlockColor());
         
-        assertEquals(BlockColor.getCurrentColors()[0], b1.getColor());
+        assertEquals(BlockColor.COLORS[0], b1.getColor());
     }
     
     @Test
     void testSetColor2() {
         b1.setColor(new BlockColor(3));
         
-        assertEquals(BlockColor.getCurrentColors()[3], b1.getColor());
+        assertEquals(BlockColor.COLORS[3], b1.getColor());
     }
     
     @Test
@@ -135,14 +137,28 @@ class BlockTest {
     }
     
     @Test
-    void testUpdatePoints() {
+    void testUpdatePoints1() {
         b1.setShape(new Shape('o', 3));
-        b1.setPoints(5, 5);
+        b1.updatePoints(5, 5);
         int[] correctPoints = {
                 5, 5, 
                 5, 6,
                 6, 5, 
                 6, 6 
+                };
+        
+        assertArrayEquals(correctPoints, b1.getPoints());
+    }
+    
+    @Test
+    void testUpdatePoints2() {
+        b1.setShape(new Shape('i', 1));
+        b1.updatePoints(0, 0);
+        int[] correctPoints = {
+                0, 0,
+                1, 0,
+                2, 0, 
+                3, 0
                 };
         
         assertArrayEquals(correctPoints, b1.getPoints());
@@ -169,7 +185,7 @@ class BlockTest {
         Block b = new Block(new BlockColor(5), new Shape('j', 0), 4, 3, 0);
         b.rotateRight();
         
-        assertArrayEquals(Shape.J[2], b.getShape());
+        assertArrayEquals(Shape.J[1], b.getShape());
     }
     
     @Test
@@ -223,7 +239,7 @@ class BlockTest {
         Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3); // will go off the board if rotated. Thus, do nothing.
         b.rotateRight();
         
-        assertEquals(3, b.getOrientation());
+        assertEquals(0, b.getOrientation());
     }
     
     @Test // ONLY CHECKING THE SHAPE
@@ -231,19 +247,19 @@ class BlockTest {
         Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3); // will go off the board if rotated. Thus, do nothing.
         b.rotateRight();
         
-        assertArrayEquals(Shape.Z[3], b.getShape());
+        assertArrayEquals(Shape.Z[0], b.getShape());
     }
     
     @Test 
     void testRotateRight3c() { // ONLY CHECKING THE POINTS
-        Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3); // will go off the board if rotated. Thus, do nothing.
+        Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3); // will go off the board if rotated but still rotate it
         b.rotateRight();
         
         int[] correctPoints = {
-                17, 9,
-                18, 8, 
+                17, 8,
+                17, 9, 
                 18, 9, 
-                19, 8
+                18, 10
                 };
         
         assertArrayEquals(correctPoints, b.getPoints());
@@ -254,7 +270,7 @@ class BlockTest {
         Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1); // will go off the board if rotated. Thus, do nothing.
         b.rotateLeft();
         
-        assertEquals(1, b.getOrientation());
+        assertEquals(0, b.getOrientation());
     }
     
     @Test
@@ -262,19 +278,19 @@ class BlockTest {
         Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1); // will go off the board if rotated. Thus, do nothing.
         b.rotateLeft();
         
-        assertArrayEquals(Shape.I[1], b.getShape());
+        assertArrayEquals(Shape.I[0], b.getShape());
     }
-    
+  
     @Test
-    void testRotateLeft1c() { // ONLY CHECKING THE POINTS
-        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1); // will go off the board if rotated. Thus, do nothing.
+    void testRotateLeft1c() { // ONLY CHECKING THE POINTS 
+        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1); // will go off the board if rotated but still do it
         b.rotateLeft();
         
         int[] correctPoints = {
-                0, 0,
+                1, -2,
+                1, -1,
                 1, 0,
-                2, 0,
-                3, 0
+                1, 1
                 };
         
         assertArrayEquals(correctPoints, b.getPoints());
@@ -313,7 +329,7 @@ class BlockTest {
     
     @Test
     void testMoveRight1() {
-        Block b = new Block(new BlockColor(5), new Shape('j', 0), 4, 3, 0); 
+        Block b = new Block(new BlockColor(5), new Shape('j', 0), 4, 1, 0); 
         b.moveRight();
         
         int[] correctPoints = {
@@ -328,14 +344,14 @@ class BlockTest {
     
     @Test
     void testMoveRight2() {
-        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1); // will go off the board if moved. Thus, do nothing.
+        Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3); // will go off the board if moved. Thus, do nothing.
         b.moveRight();
         
         int[] correctPoints = {
-                0, 0,
-                1, 0,
-                2, 0,
-                3, 0
+                17, 9,
+                18, 8,
+                18, 9,
+                19, 8
                 };
         
         assertArrayEquals(correctPoints, b.getPoints());
@@ -347,10 +363,10 @@ class BlockTest {
         b.moveLeft();
         
         int[] correctPoints = {
-                4, 4,
-                5, 4,
-                5, 5, 
-                5, 6
+                4, 2,
+                5, 2,
+                5, 3, 
+                5, 4
                 };
         
         assertArrayEquals(correctPoints, b.getPoints());
@@ -358,29 +374,29 @@ class BlockTest {
     
     @Test
     void testMoveLeft2() {
-        Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 8, 3);
+        Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3);
         b.moveLeft();
         
         int[] correctPoints = {
-                17, 9,
+                17, 8,
+                18, 7,
                 18, 8,
-                18, 9,
-                19, 8
+                19, 7
                 };
-        
+
         assertArrayEquals(correctPoints, b.getPoints());
     }
     
     @Test
     void testMoveLeft3() {
-        Block b = new Block(new BlockColor(2), new Shape('Z', 3), 17, 9, 3); // will go off the board if moved. Thus, do nothing.
+        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1); // will go off the board if moved. Thus, do nothing.
         b.moveLeft();
         
         int[] correctPoints = {
-                17, 9,
-                18, 8,
-                18, 9,
-                19, 8
+                0, 0,
+                1, 0,
+                2, 0,
+                3, 0
                 };
         
         assertArrayEquals(correctPoints, b.getPoints());
