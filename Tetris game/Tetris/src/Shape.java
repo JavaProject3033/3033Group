@@ -140,11 +140,8 @@ public class Shape {
         
         // initializing shape array variables
         int shapesIndex = shapeLetters.indexOf(Character.toUpperCase(shape));
-        System.out.println("shapes index: " + shapesIndex);
         int numRows = shapes[shapesIndex][0].length;
         int numCols = shapes[shapesIndex][0][0].length;
-        
-        System.out.println("num rows: " + numRows);
         
 	    this.shape = new boolean[numRows][numCols];
 		setShape(shape, orientation);
