@@ -240,7 +240,7 @@ public class Board
         block, it should â€œfallâ€� down until it is resting on something
         */
         
-        board = new boolean[ROWS][COLS];
+        boolean[][] newBoard = new boolean[ROWS][COLS];
         
         for(int i = 0; i < blocksLength; i ++) {
             int[] points = blocks[i].getPoints();
@@ -253,10 +253,12 @@ public class Board
             
             for(int j = 0; j < points.length; j += 2) {
                 if(isValidLocation(points[j], points[j + 1]) && blocks[i].isValidShapePoint(points[j], points[j + 1])) {
-                    board[points[j]][points[j + 1]] = true;
+                    newBoard[points[j]][points[j + 1]] = true;
                 } // end if
             } // end for
         } // end for
+        
+        board = newBoard;
     }    
     
     void removeBlankBlocks()
@@ -368,7 +370,7 @@ public class Board
             int[] points = current.getPoints();
             
             for(int j = 0; j < points.length; j += 2) {
-                if(isValidLocation(points[j], points[j + 1])) {
+                if(isValidLocation(points[j], points[j + 1]) && current.isValidShapePoint(points[j], points[j + 1])) {
                     locations[points[j]][points[j + 1]] = current;
                 } // end if
             } // end for
@@ -384,28 +386,41 @@ public class Board
         int[] points = b.getPoints();
         
         for(int i = 0; i < points.length; i += 2) {
-            int x = i;
-            int y = i + 2;
-            int[] possibleNeighborsPoints = {x, y - 1, x + 1, y, x, y + 1, x - 1, y};
+            int r = i;
+            int c = i + 1;
+            int[] possibleNeighborsPoints = {
+                    points[r], points[c] - 1, 
+                    points[r] + 1, points[c], 
+                    points[r], points[c] + 1, 
+                    points[r] - 1, points[c]};
+            System.out.println("POINT " + b.getShapeObj().getLetter() + " " + r + " " + c);
             
             // a neighbor is any block around any point that is not the same block . . .
             for(int j = 0; j < possibleNeighborsPoints.length; j += 2) {
-                Block current = locations[i][i + 1];
-                
-                if(current != null && current != b) {
-                    boolean alreadyIncluded = false;
+                if(this.isValidLocation(possibleNeighborsPoints[j], possibleNeighborsPoints[j + 1])) {
+                    Block current = locations[possibleNeighborsPoints[j]][possibleNeighborsPoints[j + 1]];
+                    System.out.println("POTENTIAL NEIGHBOR: " + current);
                     
-                    // . . . or a block that is already counted as a neighbor
-                    for(int k = 0; k < neighborsIndex; k ++) {
-                        if(current == neighbors[k]) {
-                            alreadyIncluded = true;
-                            break;
+                    if(current != null && 
+                            current != b && 
+                            current.isValidShapePoint(possibleNeighborsPoints[j], possibleNeighborsPoints[j + 1]) && 
+                            board[possibleNeighborsPoints[j]][possibleNeighborsPoints[j + 1]]) {
+                        boolean alreadyIncluded = false;
+                        
+                        // . . . or a block that is already counted as a neighbor
+                        for(int k = 0; k < neighborsIndex; k ++) {
+                            if(current == neighbors[k]) {
+                                alreadyIncluded = true;
+                                System.out.println("already included");
+                                break;
+                            } // end if
+                        } // end for
+                        
+                        if(!alreadyIncluded) {
+                            neighbors[neighborsIndex] = current;
+                            neighborsIndex ++;
+                            System.out.println("NEIGHBOR");
                         } // end if
-                    } // end for
-                    
-                    if(!alreadyIncluded) {
-                        neighbors[neighborsIndex] = current;
-                        neighborsIndex ++;
                     } // end if
                 } // end if
             } // end for
@@ -415,8 +430,6 @@ public class Board
     } // end getNeighbors
     
     public boolean isAtBottom(Block b) {
-        Block[][] locations = generateBlockLocations();
-        
         for(int i = 0; i < b.getPoints().length; i += 2) {
             int currentR = b.getPoints()[i];
             int currentC = b.getPoints()[i + 1];
@@ -431,8 +444,13 @@ public class Board
                 } // end if
                     
                 // there is a valid square below it on the board (or the board bottom)
+                Block[][] locations = generateBlockLocations();
                 Block below = locations[currentR + 1][currentC];
-                if (below != null && below.isValidShapePoint(currentR + 1, currentC) && below != b && board[currentR + 1][currentC]) {
+                System.out.println("this: " + b + " below: " + below);
+
+                if(below != null) System.out.println("Below valid: " + below.isValidShapePoint(currentR + 1, currentC));
+                System.out.println("below valid on board: " + board[currentR + 1][currentC] );
+                if (below != null && board[currentR + 1][currentC] && below.isValidShapePoint(currentR + 1, currentC) && below != b) {
                     System.out.println("VALID+AT BOTTOM: " + b.getShapeObj().getLetter() + " " + currentR + " " + currentC);
                     return true;
                 } // end if
@@ -442,6 +460,7 @@ public class Board
             else {
                 System.out.println("INVALID: " + b.getShapeObj().getLetter() + " " + currentR + " " + currentC);
             }
+            System.out.println("");
          } // end for
         
         return false;
