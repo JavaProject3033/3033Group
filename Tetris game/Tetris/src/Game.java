@@ -36,7 +36,7 @@ public class Game {
     
     private boolean exitGame;
     private int squareSideLength; // used for drawing the blocks
-    private final Rectangle[] squares; // GUI representation of the possible squares that make up the board.
+//    private final Rectangle[] squares; // GUI representation of the possible squares that make up the board.
     
     Score score;
     Board board;
@@ -49,13 +49,13 @@ public class Game {
         squareSideLength = 20;
         board = new Board(FALL_SPEED, dropSpeed, squareSideLength);
         
-        squares = new Rectangle[BlockColor.NUM_COLORS + 1];
+//        squares = new Rectangle[BlockColor.NUM_COLORS + 1];
         
-        for(int i = 0; i < squares.length - 1; i++) {
-            squares[i] = new Rectangle(squareSideLength, squareSideLength, BlockColor.COLORS[i]);
-        } // end for
+//        for(int i = 0; i < squares.length - 1; i++) {
+//            squares[i] = new Rectangle(squareSideLength, squareSideLength, BlockColor.COLORS[i]);
+//        } // end for
         
-        squares[squares.length - 1] = new Rectangle(squareSideLength, squareSideLength, Color.WHITE);
+//        squares[squares.length - 1] = new Rectangle(squareSideLength, squareSideLength, Color.WHITE);
     } // end Game default constructor
     
     public void playGame(Stage stage, Scene nextScene) {
@@ -146,6 +146,12 @@ public class Game {
         // set the second preview to the block after the first preview
         setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
         
+        // checking for game over condition
+        // game over occurs when a block can't move down AND one of its points is above the top of the board
+        if(isAtBottom(board.getCurrent()) && !isValidBlock(board.getCurrent())) { 
+            stage.setScene(nextScene);
+        } // end if
+        
         // MAIN PANE
         HBox mainPane = new HBox(GameLauncher.ITEM_SPACING, leftPane, boardPane, rightPane);
         
@@ -195,10 +201,18 @@ public class Game {
         stage.setScene(scene);
     } // end playGame
     
+    private Rectangle newRectangle(int color) {
+        if(color < BlockColor.NUM_COLORS)
+            return new Rectangle(squareSideLength, squareSideLength, BlockColor.COLORS[color]);
+        
+        else
+            return new Rectangle(squareSideLength, squareSideLength, Color.WHITE);
+    } // end newRectangle
+    
     public void moveDownOne(Block b) {
         if(!isAtBottom(b)) {
-            int currentX = b.getPoints[0];
-            int newY = b.getPoints[1];
+            int currentX = b.getPoints()[0];
+            int newY = b.getPoints()[1];
             b.updatePoints(currentX, newY);
         } // end if
     } // end moveDownOne
@@ -216,7 +230,6 @@ public class Game {
         Shape bShape = b.getShapeObj();
         int[] bPoints = b.getPoints();
         Block testBlock = new Block(bColor, bShape, bPoints[0], bPoints[1], b.getOrientation()); // create a copy of the block to test rotate
-        int[] testPoints = testBlock.getPoints();
         
         // performing the move on the test block
         switch (move) {
@@ -241,9 +254,15 @@ public class Game {
         } // end switch
         
         // checking to see if the move resulted in valid points
-        for(int i = 0; i < testPoints.length; i += 2) {
-            int x = testPoints[i];
-            int y = testPoints[i + 1];
+        return isValidBlock(testBlock);
+    } // end isValidBlock
+    
+    public boolean isValidBlock(Block b) {
+        int[] points = b.getPoints();
+        
+        for(int i = 0; i < points.length; i += 2) {
+            int x = points[i];
+            int y = points[i + 1];
             
             if(!(x >= 0 && x < Board.ROWS && y >= 0 && y < Board.COLS)) // not within bounds of the board
                 return false;
@@ -264,10 +283,10 @@ public class Game {
         for(int r = 0; r < numRows; r ++) {
             for(int c = 0; c < numCols; c ++) {
                 if(shape[r][c]) // if there is a square in this index
-                    square = squares[block.getColorNum()];
+                    square = newRectangle(block.getColorNum());
                     
                 else // otherwise there is no square
-                    square = squares[squares.length - 1];
+                    square = newRectangle(BlockColor.NUM_COLORS);
                 
                 pane.add(square, r, c);
             } // end for
@@ -278,7 +297,7 @@ public class Game {
         // filling pane with white squares first
         for(int r = 0; r < Board.ROWS; r ++) {
             for(int c = 0; c < Board.COLS; c ++) {
-                pane.add(squares[squares.length - 1], r, c);
+                pane.add(newRectangle(BlockColor.NUM_COLORS), r, c);
             } // end for
         } // end for
         
@@ -289,13 +308,13 @@ public class Game {
             if(blocks[i] == null)
                 break;
             
-            int points = blocks[i].getPoints();
+            int[] points = blocks[i].getPoints();
             // TODO currently assuming points that aren't there anymore are set to -1 ...
             for(int j = 0; j < POINTS_ARR_LEN; j += 2) { // for each point in the block
                 if(points[j] == -1)
                     break;
                 
-                pane.add(squares[blocks[i].getColorNum()], points[j], points[j + 1]);
+                pane.add(newRectangle(blocks[i].getColorNum()), points[j], points[j + 1]);
             } // end for
         } // end for
     } // end setBoardPane
@@ -317,7 +336,7 @@ public class Game {
             int currentY = b.getPoints()[i + 1];
             
          // this is a bottom point and there is a square below it on the board (or the board bottom)
-            if(currentY == maxY && (board[currentX][currentY + 1] || currentY == Board.ROWS - 1)) 
+            if(currentY == maxY && (board.getBoard()[currentX][currentY + 1] || currentY == Board.ROWS - 1)) 
                 return true;
         } // end for
         
