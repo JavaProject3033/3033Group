@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Board 
 {
-    public final static int ROWS = 10;
+    public final static int ROWS = 20;
     public final static int COLS = 10;
     final int MAX_BLOCKS = ROWS * COLS / 4;
     boolean board[][];
@@ -30,6 +30,7 @@ public class Board
         blocks = new Block[MAX_BLOCKS];
         blocksLength = 0;
         futureBlocks = new Block[Shape.NUM_SHAPES];
+        generateNewFutureBlocks();
         normalBlockSpeed = 0;
         dropBlockSpeed = 0;
         squareSideLength = 0;
@@ -51,6 +52,7 @@ public class Board
         blocks = new Block[MAX_BLOCKS];
         blocksLength = 0;
         futureBlocks = new Block[Shape.NUM_SHAPES];
+        generateNewFutureBlocks();
         normalBlockSpeed = normalSpeed;
         dropBlockSpeed = dropSpeed;
         squareSideLength = sideLen;
@@ -83,14 +85,24 @@ public class Board
                 for(int j=0; j<COLS; j++){
                     board[i][j] = false;
                     
-                    // change the parts of the block shapes to false
                     Block current = locations[i][j];
-                    current.getShape()[i][j] = false;
+
+                    // change the parts of the block shapes to false
+                    int[] firstPointInShape = current.getFirstPoint();
+                    int[] firstPoints = {current.getPoints()[current.getFirstPointIndex()], current.getPoints()[current.getFirstPointIndex() + 1]};
+                    int[] shapeArrOrigin = {firstPoints[0] - firstPointInShape[0], firstPoints[1] - firstPointInShape[1]}; // find the location of row 0 and col 0 of the shape on the board
+                    current.getShape()[i - shapeArrOrigin[0]][ j - shapeArrOrigin[1]] = false; // for each point referred to by i and j, find the row/col in the shape array and set it to false
+                    
                     // TODO not modifying the points array; might be an issue . . . (esp. since there isn't a good way to signify
                         // that there is no point without breaking other parts . . . 
+                    
+                  System.out.println(i + " " + j + "\n" + current.getShapeObj());
+
                 }
             }
         }
+        
+        System.out.println("in method\n" + toString());
         
         moveBlocksDown();
     }
@@ -120,7 +132,7 @@ public class Board
                 Block[] neighbors = getNeighbors(current);
                 
                 // counting the number of neighbors with the same color as the current block
-                BlockColor blockColor = current.getColorNum();
+                int blockColor = current.getColorNum();
                 Block[] sameColorBlocks = new Block[neighbors.length];
                 int numSameColor = 0;
                 
@@ -155,14 +167,15 @@ public class Board
 	Increments the currentBlockIndex variable
 	Calls on generateNewFutureBlocks when needed
         */
+        currentBlockIndex++;
+        
         if (currentBlockIndex > futureBlocks.length -1) {
             currentBlockIndex = 0;
             generateNewFutureBlocks();
             
-        }
-        
+        } 
+       
         current = futureBlocks[currentBlockIndex];
-        currentBlockIndex++;
     }
     
     boolean isValidLocation(int x, int y)
@@ -171,7 +184,7 @@ public class Board
         Checks to see if a point is on the board
 	Use this to check if a userâ€™s move would be valid or not
         */    
-        if(x<0 || x>9 || y<0 || y>9)
+        if(x<0 || x>=ROWS || y<0 || y>=COLS)
             return false;
         else
             return true;
@@ -226,29 +239,24 @@ public class Board
         If a block is not touching the bottom or attached somewhere to another 
         block, it should â€œfallâ€� down until it is resting on something
         */
-        //Clear floating row
-        boolean blankRow =  false;
         
-        for(int i=ROWS-1; i>=0; i--) {
-            blankRow = true;
+        board = new boolean[ROWS][COLS];
+        
+        for(int i = 0; i < blocksLength; i ++) {
+            int[] points = blocks[i].getPoints();
             
-            for(int j=0; j<COLS; j++){
-                if(board[i][j] == true){ 
-                    blankRow = false;
-                    break;
-                }
-            }
+            while(!isAtBottom(blocks[i])) {
+                for(int j = 0; j < points.length; j += 2) {
+                    points[j] ++;
+                } // end for
+            } // end while
             
-            if(blankRow){
-                for(int row=i; row>0; row--) {
-                    for(int col=0; col<COLS; col++)
-                        board[row][col] = board[row-1][col];
-                }
-                
-                for(int j=0; j<COLS; j++)
-                    board[0][j] = false;                                                
-            }
-        }              
+            for(int j = 0; j < points.length; j += 2) {
+                if(isValidLocation(points[j], points[j + 1]) && blocks[i].isValidShapePoint(points[j], points[j + 1])) {
+                    board[points[j]][points[j + 1]] = true;
+                } // end if
+            } // end for
+        } // end for
     }    
     
     void removeBlankBlocks()
@@ -260,7 +268,7 @@ public class Board
         boolean validShape = false;  
         ArrayList<Block> validBlocks = new ArrayList<Block>();
         
-        for(int i=0; i<blocks.length; i++) {
+        for(int i=0; i<blocksLength; i++) {
             validShape = false;
             Shape shape = blocks[i].getShapeObj();
             boolean[][] shapeArray = shape.getShape();
@@ -275,10 +283,10 @@ public class Board
             
             if(validShape)
                 validBlocks.add(blocks[i]);
-            }
+        }
         
-        blocks = new Block[validBlocks.size()];
         blocks = validBlocks.toArray(blocks);
+        blocksLength = validBlocks.size();
     }
         
     void addBlock(Block b) {
@@ -291,7 +299,7 @@ public class Board
         for(int i = 0; i < points.length; i += 2) {
             int x = points[i];
             int y = points[i + 1];
-            
+
             board[x][y] = true;
         } // end for
     } // end addBlock
@@ -360,7 +368,9 @@ public class Board
             int[] points = current.getPoints();
             
             for(int j = 0; j < points.length; j += 2) {
-               locations[points[i]][points[i + 1]] = current;
+                if(isValidLocation(points[j], points[j + 1])) {
+                    locations[points[j]][points[j + 1]] = current;
+                } // end if
             } // end for
         } // end for
         
@@ -403,6 +413,39 @@ public class Board
         
         return Arrays.copyOf(neighbors, neighborsIndex);
     } // end getNeighbors
+    
+    public boolean isAtBottom(Block b) {
+        Block[][] locations = generateBlockLocations();
+        
+        for(int i = 0; i < b.getPoints().length; i += 2) {
+            int currentR = b.getPoints()[i];
+            int currentC = b.getPoints()[i + 1];
+            
+            // this is a valid shape point 
+            if(b.isValidShapePoint(currentR, currentC)) {
+                System.out.println("VALID: " + b.getShapeObj().getLetter() + " " + currentR + " " + currentC);
+                
+                if (currentR == ROWS - 1) { // at the bottom of the board
+                    System.out.println("VALID+AT BOTTOM: " + b.getShapeObj().getLetter() + " " + currentR + " " + currentC);
+                    return true;
+                } // end if
+                    
+                // there is a valid square below it on the board (or the board bottom)
+                Block below = locations[currentR + 1][currentC];
+                if (below != null && below.isValidShapePoint(currentR + 1, currentC) && below != b && board[currentR + 1][currentC]) {
+                    System.out.println("VALID+AT BOTTOM: " + b.getShapeObj().getLetter() + " " + currentR + " " + currentC);
+                    return true;
+                } // end if
+                
+            } // end if
+            
+            else {
+                System.out.println("INVALID: " + b.getShapeObj().getLetter() + " " + currentR + " " + currentC);
+            }
+         } // end for
+        
+        return false;
+    } // end isAtBottom
     
     // getters/setters for non-final variables
 
@@ -468,5 +511,29 @@ public class Board
 
     public void setCurrent(Block current) {
         this.current = current;
-    }        
+    }    
+    
+    public int getBlocksLength() {
+        return blocksLength;
+    }
+    
+    public String toString() {
+        String boardStr = "";
+        
+        for(int r = 0; r < ROWS; r ++) {
+            for(int c = 0; c < COLS; c ++) {
+                if(board[r][c]) {
+                    boardStr += "# ";
+                }
+                
+                else {
+                    boardStr += ". ";
+                }
+            }
+            
+            boardStr += "\n";
+        }
+        
+        return boardStr;
+    }
 }
