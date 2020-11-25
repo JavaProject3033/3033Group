@@ -11,7 +11,7 @@ public class Sound {
     MediaPlayer player;
     
     public Sound() {
-        this(0.25);
+        this(0.20);
     }
     public Sound(double volume)
     {
@@ -25,11 +25,19 @@ public class Sound {
     {
     	if(volume<1)
     		this.volume+=VOLUME_CHANGE_AMOUNT;
+    	
+    	if(volume > 1) {
+    	    this.volume = 1;
+    	}
     }
     public void decreaseVolume()
     {
     	if(volume>0)
     		volume-=VOLUME_CHANGE_AMOUNT;
+    	
+    	if(volume < 0) {
+            this.volume = 0;
+        }
     }
     
     public void playSong() 
