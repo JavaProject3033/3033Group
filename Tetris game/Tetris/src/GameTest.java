@@ -7,7 +7,6 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
-import java.time.*;
 import java.util.Arrays;
 
 public class GameTest {
@@ -225,7 +224,7 @@ public class GameTest {
         b.removeBlock(5);
         g.setBoard(b);
         
-        assertFalse(g.isAtBottom(b.getBlocks()[6]) /*z*/);
+        assertFalse(g.isAtBottom(b.getBlocks()[5]) /*z*/);
     }
     
     @Test
@@ -235,5 +234,32 @@ public class GameTest {
         g.setBoard(b);
         
         assertFalse(g.isAtBottom(b.getBlocks()[4]) /*t*/);
+    }
+    
+    @Test
+    void isValidBlock1() {
+        Board b = BoardTest.generateb3();
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), -2, 0, 0);
+        g.setBoard(b);
+        
+        assertFalse(g.isValidBlock(z));
+    }
+    
+    @Test
+    void isValidBlock2() {
+        Board b = BoardTest.generateb3();
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), 9, 5, 0);
+        g.setBoard(b);
+        
+        assertTrue(g.isValidBlock(z));
+    }
+    
+    @Test
+    void isValidBlock3() {
+        Board b = BoardTest.generateb3();
+        Block z = new Block(new BlockColor(0), new Shape('z', 0), 18, 0, 0);
+        g.setBoard(b);
+        
+        assertFalse(g.isValidBlock(z));
     }
 }
