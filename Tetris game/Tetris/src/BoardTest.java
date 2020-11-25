@@ -149,9 +149,13 @@ public class BoardTest {
         Board expected = generateb4();
         Block[] expectedBlocks = expected.getBlocks();
         
-        for(int i = 1; i < Board.COLS; i++) {
-            expected.getBoard()[19][i] = false;
+        for(int i = 0; i < Board.COLS; i++) {
+            expected.getBoard()[18][i] = false;
         } // end for
+        
+        expected.getBoard()[16][3] = false;
+        expected.getBoard()[16][9] = false;
+        expected.getBoard()[17][6] = false;
         
         expected.getBoard()[17][3] = true; // so I'm trying to test certain aspects to see if it matches up
         expected.getBoard()[17][9] = true; // setting the expected board values up
@@ -174,6 +178,8 @@ public class BoardTest {
         expectedBlocks[5].getShape()[2][0] = false;
         expectedBlocks[5].getShape()[2][1] = false;
         
+        System.out.println("expected: " + expected.toString() + "\n");
+        
         // setting up the actual outcome
         Board b4 = generateb4();
         System.out.println(b4.toString() + "\n");
@@ -188,9 +194,9 @@ public class BoardTest {
         } // end for
         
         // comparing the expected and actual shapes
-        for(int i = 0; i < expectedBlocks.length; i++) {
+        for(int i = 0; i < expected.getBlocksLength(); i++) {
             for(int r = 0; r < expectedBlocks[i].getShape().length; r ++) {
-                assertArrayEquals(expectedBlocks[r].getShape(), b4.getBlocks()[i].getShape());
+                assertArrayEquals(expectedBlocks[i].getShape()[r], b4.getBlocks()[i].getShape()[r]);
             } // end for
         } // end for
         
