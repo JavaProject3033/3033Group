@@ -8,14 +8,14 @@
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.*;
 import javafx.scene.paint.*;
 
 public class BoardTest {
-    Board b1, b2;
+    static Board b1, b2;
     
-    boolean[][][][] allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
+    static boolean[][][][] allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
+    static char[] shapeLetters = {'O', 'I', 'S', 'Z', 'L', 'J', 'T'};
     
     @BeforeEach
     public void setup() {
@@ -30,7 +30,7 @@ public class BoardTest {
         
         for(int r = 0; r < Board.ROWS; r++) {
             for(int c = 0; c < Board.COLS; c++) {
-                if(!b1.getBoard()[r][c]) {
+                if(b1.getBoard()[r][c]) {
                     allFalse = false;
                 } // end if
             } // end for
@@ -88,7 +88,7 @@ public class BoardTest {
         
         for(int r = 0; r < Board.ROWS; r++) {
             for(int c = 0; c < Board.COLS; c++) {
-                if(!b2.getBoard()[r][c]) {
+                if(b2.getBoard()[r][c]) {
                     allFalse = false;
                 } // end if
             } // end for
@@ -143,9 +143,63 @@ public class BoardTest {
         assertArrayEquals(generateb3().getBoard(), b3.getBoard());
     }
     
+    @Test 
+    void testClearRow2() {
+        // setting up the expected board
+        Board expected = generateb4();
+        Block[] expectedBlocks = expected.getBlocks();
+        
+        for(int i = 1; i < Board.COLS; i++) {
+            expected.getBoard()[19][i] = false;
+        } // end for
+        
+        expected.getBoard()[17][3] = true; // so I'm trying to test certain aspects to see if it matches up
+        expected.getBoard()[17][9] = true; // setting the expected board values up
+        expected.getBoard()[18][3] = true;
+        expected.getBoard()[18][6] = true;
+        expected.getBoard()[18][9] = true;
+        
+        expectedBlocks[0].getShape()[0][0] = false;
+        expectedBlocks[0].getShape()[0][1] = false;
+        
+        expectedBlocks[1].getShape()[2][0] = false;
+        expectedBlocks[1].getShape()[2][1] = false;
+        
+        expectedBlocks[2].getShape()[0][1] = false;
+        
+        expectedBlocks[3].getShape()[1][0] = false;
+        expectedBlocks[3].getShape()[1][1] = false;
+        expectedBlocks[3].getShape()[1][2] = false;
+        
+        expectedBlocks[5].getShape()[2][0] = false;
+        expectedBlocks[5].getShape()[2][1] = false;
+        
+        // setting up the actual outcome
+        Board b4 = generateb4();
+        System.out.println(b4.toString() + "\n");
+        
+        b4.clearRow();
+        
+        System.out.println(b4.toString() + "\n");
+        
+        // comparing the expected and actual board
+        for(int r = 0; r < expected.getBoard().length; r++) {
+            assertArrayEquals(expected.getBoard()[r], b4.getBoard()[r]);
+        } // end for
+        
+        // comparing the expected and actual shapes
+        for(int i = 0; i < expectedBlocks.length; i++) {
+            for(int r = 0; r < expectedBlocks[i].getShape().length; r ++) {
+                assertArrayEquals(expectedBlocks[r].getShape(), b4.getBlocks()[i].getShape());
+            } // end for
+        } // end for
+        
+    }
+    
+    /**
     // should clear a row on the board
     @Test
-    void testClearRow2() {
+    void testClearRowTEMP() {
         Board after = new Board(1, 2, 30); // this one is hard to test . . .
         Block[] blocks = after.getBlocks();
         after.getBoard()[17][3] = true; // so I'm trying to test certain aspects to see if it matches up
@@ -154,15 +208,15 @@ public class BoardTest {
         after.getBoard()[18][6] = true;
         after.getBoard()[18][9] = true;
         
-        for(int i = 1; i < Board.ROWS; i++) {
-            after.getBoard()[19][i] = true;
+        for(int i = 1; i < Board.COLS; i++) {
+            after.getBoard()[19][i] = false;
         } // end for
         
         // checking to see if the expected color values are there
         int[] colorCount = {0, 0, 0}; // doing this by counting the number of occurrences of each color to see if it matches
         Color blockColor;
         
-        for(int i = 0; i < blocks.length; i++) {
+        for(int i = 0; i < after.getBlocksLength(); i++) {
             blockColor = blocks[i].getColor();
             
             if(blockColor.equals(BlockColor.COLORS[0])) {
@@ -183,7 +237,7 @@ public class BoardTest {
         } // end for
         
         // if the colors are wrong, then the test fails
-        if(colorCount[0] != 3 || colorCount[1] != 1 || colorCount[2] != 2) {
+        if(colorCount[0] == 3 && colorCount[1] == 1 && colorCount[2] == 2) {
             fail();
             return;
         } // end if
@@ -197,7 +251,7 @@ public class BoardTest {
         } // end for
         
         // automatically passes if it reaches this point
-    }
+    } **/
     
     // no blocks with touching colors; should be no change
     @Test
@@ -239,14 +293,15 @@ public class BoardTest {
         Block next = b.getFutureBlocks()[1];
         
         b.nextBlock();
-        
+
         assertEquals(next, b.getCurrent());
     }
     
     @Test
     void testNextBlock2() {
         Board b = new Board(1, 2, 30);
-        int next = 2;
+        b.setCurrentBlockIndex(3);
+        int next = 4;
         
         b.nextBlock();
         
@@ -292,13 +347,13 @@ public class BoardTest {
     // invalid location past the right of the board
     @Test
     void testIsValidLoaction3() {
-        assertFalse(b1.isValidLocation(10, 10));
+        assertFalse(b1.isValidLocation(20, 10));
     }
     
     // valid location near the right of the board
     @Test
     void testIsValidLoaction4() {
-        assertFalse(b1.isValidLocation(9, 10));
+        assertTrue(b1.isValidLocation(19, 9));
     }
     
     // invalid location past the left of the board
@@ -310,7 +365,7 @@ public class BoardTest {
     // valid location near the left of the board
     @Test
     void testIsValidLoaction6() {
-        assertFalse(b1.isValidLocation(0, 10));
+        assertTrue(b1.isValidLocation(0, 9));
     }
     
     // invalid location below the bottom of the board
@@ -328,19 +383,20 @@ public class BoardTest {
     // valid location in the middle of the board
     @Test
     void testIsValidLoaction9() {
-        assertFalse(b1.isValidLocation(5, 10));
+        assertTrue(b1.isValidLocation(5, 5));
     }
     
     // making sure it is not the same as the previous futureBlocks array
     @Test
     void testGenerateNewFutureBlocks1() {
         Board b = new Board(1, 2, 30);
-        Block[] currentBlocks = b.getFutureBlocks();
+        Block[] currentBlocks = Arrays.copyOf(b.getFutureBlocks(), b.getFutureBlocks().length);
+        
         
         b.generateNewFutureBlocks();
         
         for(int i = 0; i < currentBlocks.length; i++) {
-            assertNotEquals(currentBlocks[i], b.getFutureBlocks()[i]);
+            assertFalse(currentBlocks[i] == b.getFutureBlocks()[i]);
         } // end for
         
         // automatically passes if it reaches this point
@@ -376,21 +432,59 @@ public class BoardTest {
         b.addBlock(new Block(new BlockColor(1), new Shape('i', 0), 19, 3, 0));
         b.addBlock(new Block(new BlockColor(2), new Shape('t', 0), 17, 7, 0));
         b.addBlock(floating); 
-        
+         
         b.moveBlocksDown();
         
-        // checking if there is a block at 15,7; if so, the block should have the characteristics (other than location) as the specified block above
-        if(b.getBoard()[15][7]) {
-            for(int i = 0; i < b.getBlocks().length; i++) { // finding the block that is at 15,7 (should be where the floating one fell to)
+        // checking if there is a block at 16,7; if so, the block should have the characteristics (other than location) as the specified block above
+        if(b.getBoard()[16][7]) {
+            for(int i = 0; i < b.getBlocksLength(); i++) { // finding the block that is at 15,7 (should be where the floating one fell to)
                 Block current = b.getBlocks()[i];
                 int[] currentPoints = current.getPoints();
                 
                 // seeing if the block is the same block that was floating
-                if(currentPoints[0] == 15 && currentPoints[1] == 7) {
-                    pass = current.isSameColor(floating) && current.equals(floating);
+                if(currentPoints[0] == 16 && currentPoints[1] == 7) {
+                    pass = current.equals(floating);
                 } 
             } // end for
         } // end if
+        
+        assertTrue(pass);  
+    }
+    
+ // block touching the same of another block--should fall down
+    @Test
+    void testMoveBlocksDown3() {
+        boolean pass = false;
+        Block floating = new Block(new BlockColor(2), new Shape('z', 0), 12, 7, 0); // this is the block that is currently floating
+        Board b = new Board(1, 2, 30); // same as b3 but without the J block colored in 3
+        b.addBlock(new Block(new BlockColor(0), new Shape('o', 0), 18, 0, 0));
+        b.addBlock(new Block(new BlockColor(1), new Shape('l', 3), 17, 1, 3));
+        b.addBlock(new Block(new BlockColor(0), new Shape('s', 3), 15, 2, 3));
+        b.addBlock(new Block(new BlockColor(1), new Shape('i', 0), 19, 3, 0));
+        b.addBlock(new Block(new BlockColor(2), new Shape('t', 0), 17, 7, 0));
+        b.addBlock(floating); 
+        b.getBlocks()[4].getShape()[0][1] = false;
+        b.getBlocks()[4].getShape()[1][2] = false;
+        b.getBoard()[17][7] = false;
+        b.getBoard()[18][8] = false;
+                
+         
+        b.moveBlocksDown();
+        
+        // checking if there is a block at 16,7; if so, the block should have the characteristics (other than location) as the specified block above
+        if(b.getBoard()[17][7]) {
+            for(int i = 0; i < b.getBlocksLength(); i++) { // finding the block that is at 15,7 (should be where the floating one fell to)
+                Block current = b.getBlocks()[i];
+                int[] currentPoints = current.getPoints();
+                
+                // seeing if the block is the same block that was floating
+                if(currentPoints[0] == 17 && currentPoints[1] == 7) {
+                    pass = current.equals(floating);
+                } 
+            } // end for
+        } // end if
+        
+        System.out.println("actual: \n" + b);
         
         assertTrue(pass);  
     }
@@ -400,10 +494,10 @@ public class BoardTest {
     void testRemoveBlankBlocks1() {
         Board b = generateb3();
         Block[] oldBlocksArr = Arrays.copyOf(b.getBlocks(), b.getBlocks().length);
-        
+
         b.removeBlankBlocks();
         
-        assertEquals(oldBlocksArr, b.getBlocks());
+        assertArrayEquals(oldBlocksArr, b.getBlocks());
     }
     
     // some blocks are blank--remove those
@@ -435,20 +529,23 @@ public class BoardTest {
         b.getBoard()[18][0] = false;
         
         // checking the blocks array to see if it got rid of the blank block but kept the partialBlank block
+        b.removeBlankBlocks();
+        
         Block[] blocksArr = b.getBlocks();
-        for(int i = 0; i < blocksArr.length; i++) {
+        for(int i = 0; i < b.getBlocksLength(); i++) {
             Block current = blocksArr[i];
             
-            if(current == blank) {
+            if(current.equals(blank)) {
                 notContainBlank = false;
             } // end if
             
-            if(current == partialBlank) {
+            if(current.equals(partialBlank)) {
                 containPartialBlank = true;
             } // end if
         } // end for
         
-        assertTrue(notContainBlank && containPartialBlank);
+        assertTrue(notContainBlank);
+        assertTrue(containPartialBlank);
     }
     
     @Test
@@ -464,7 +561,7 @@ public class BoardTest {
         
         // checking to see if the block was added to the block list
         Block[] blocksArr = b.getBlocks();
-        for(int i = 0; i < blocksArr.length; i ++) {
+        for(int i = 0; i < b.getBlocksLength(); i ++) {
             Block current = blocksArr[i];
             int[] points = current.getPoints();
             
@@ -487,12 +584,14 @@ public class BoardTest {
         // checking to see if the block was actually removed
         successfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
         
+        assertTrue(successfullyRemoved);
+        
         Block[] blocksArr = b.getBlocks();
-        for(int i = 0; i < blocksArr.length; i ++) {
+        for(int i = 0; i < b.getBlocksLength(); i ++) {
             Block current = blocksArr[i];
             int[] points = current.getPoints();
             
-            if(points[0] == 14 && points[1] == 8) { // if the block at 0,0 matches the added block in the other characteristics
+            if(points[0] == 14 && points[1] == 8) { // if the block at 14, 8 is still in the blocks array
                 successfullyRemoved = false;
             } // end if
         } // end for
@@ -536,7 +635,7 @@ public class BoardTest {
         successfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
         
         Block[] blocksArr = b.getBlocks();
-        for(int i = 0; i < blocksArr.length; i ++) {
+        for(int i = 0; i < b.getBlocksLength(); i ++) {
             Block current = blocksArr[i];
             int[] points = current.getPoints();
             
@@ -575,7 +674,7 @@ public class BoardTest {
     void testRemoveBlock7() {
         boolean successfullyRemoved = true;
         Board b = generateb3();
-        Block removed = new Block(new BlockColor(3), new Shape('j', 3), 14, 8, 3); // assuming that a copy of this block should be at index 5
+        Block removed = new Block(new BlockColor(3), new Shape('j', 3), 14, 8, 3); // assuming that a copy of this block should not be at index 5
         
         b.removeBlock(5);
         
@@ -583,7 +682,7 @@ public class BoardTest {
         successfullyRemoved = !b.getBoard()[14][8] || !b.getBoard()[15][8] || !b.getBoard()[16][8] || !b.getBoard()[16][7];
         
         Block[] blocksArr = b.getBlocks();
-        for(int i = 0; i < blocksArr.length; i ++) {
+        for(int i = 0; i < b.getBlocksLength(); i ++) {
             Block current = blocksArr[i];
             int[] points = current.getPoints();
             
@@ -613,35 +712,35 @@ public class BoardTest {
         Block[][] actualLocations = b.generateBlockLocations();
         Block[][] expectedLocations = new Block[Board.ROWS][Board.COLS];
         
-        expectedLocations[0][18] = z;
-        expectedLocations[1][18] = z;
-        expectedLocations[1][19] = z;
-        expectedLocations[2][19] = z;
+        expectedLocations[18][0] = z;
+        expectedLocations[18][1] = z;
+        expectedLocations[19][1] = z;
+        expectedLocations[19][2] = z;
         
-        expectedLocations[3][16] = j1;
-        expectedLocations[3][17] = j1;
-        expectedLocations[3][18] = j1;
-        expectedLocations[2][18] = j1;
+        expectedLocations[16][3] = j1;
+        expectedLocations[17][3] = j1;
+        expectedLocations[18][3] = j1;
+        expectedLocations[18][2] = j1;
 
-        expectedLocations[4][18] = t1;
-        expectedLocations[3][19] = t1;
-        expectedLocations[4][19] = t1;
-        expectedLocations[5][19] = t1;
+        expectedLocations[18][4] = t1;
+        expectedLocations[19][3] = t1;
+        expectedLocations[19][4] = t1;
+        expectedLocations[19][5] = t1;
         
-        expectedLocations[5][18] = t2;
-        expectedLocations[6][17] = t2;
-        expectedLocations[6][18] = t2;
-        expectedLocations[7][18] = t2;
+        expectedLocations[18][5] = t2;
+        expectedLocations[17][6] = t2;
+        expectedLocations[18][6] = t2;
+        expectedLocations[18][7] = t2;
         
-        expectedLocations[6][19] = i;
-        expectedLocations[7][19] = i;
-        expectedLocations[8][19] = i;
-        expectedLocations[9][19] = i;
+        expectedLocations[19][6] = i;
+        expectedLocations[19][7] = i;
+        expectedLocations[19][8] = i;
+        expectedLocations[19][9] = i;
         
-        expectedLocations[8][18] = j2;
-        expectedLocations[9][16] = j2;
-        expectedLocations[9][17] = j2;
-        expectedLocations[9][18] = j2;
+        expectedLocations[18][8] = j2;
+        expectedLocations[16][9] = j2;
+        expectedLocations[17][9] = j2;
+        expectedLocations[18][9] = j2;
         
         for(int r = 0; r < Board.ROWS; r ++) {
             assertArrayEquals(expectedLocations, actualLocations);
@@ -713,6 +812,22 @@ public class BoardTest {
         assertArrayEquals(expectedNeighbors, actualNeighbors);
     }
     
+    @Test
+    void testIsAtBottom1() {
+        Board b = BoardTest.generateb3();
+        b.removeBlock(5);
+        
+        assertFalse(b.isAtBottom(b.getBlocks()[5]) /*z*/);
+    }
+    
+    @Test
+    void testIsAtBottom2() {
+        Board b = BoardTest.generateb3();
+        b.removeBlock(5);
+        
+        assertTrue(b.isAtBottom(b.getBlocks()[4]) /*t*/);
+    }
+    
     // helper functions
     /**
      * Checks if the given Board object has a valid futureBlocks array
@@ -724,16 +839,24 @@ public class BoardTest {
         boolean hasEveryColor = true;
         boolean[] isColorInArray = new boolean[BlockColor.NUM_COLORS];
         
+        Block[] validFutureBlocks = {
+                new Block(new BlockColor(6), new Shape('o', 0), 18, 0, 0),
+                new Block(new BlockColor(5), new Shape('l', 3), 17, 1, 3),
+                new Block(new BlockColor(4), new Shape('s', 3), 15, 2, 3),
+                new Block(new BlockColor(3), new Shape('i', 0), 19, 3, 0),
+                new Block(new BlockColor(2), new Shape('t', 0), 17, 7, 0),
+                new Block(new BlockColor(1), new Shape('j', 3), 14, 8, 3),
+                new Block(new BlockColor(0), new Shape('z', 0), 12, 7, 0)      
+        };
+        
         for(int i = 0; i < b.getFutureBlocks().length; i++) { // for every block in futureBlocks
-            for(int j = 0; j < allShapes.length; j++) { // for every shape
-                for(int k = 0; k < allShapes[j].length; k++) { // for every orientation
-                    if(Arrays.equals(allShapes[j][k], b.getFutureBlocks()[i].getShape())) { //if the shapes/orientations are equal
-                        isShapeInArray[j] = true;
-                    } // end else
-                } // end for
+            for(int j = 0; j < Shape.NUM_SHAPES; j ++) {
+                if(b.getFutureBlocks()[i].getShapeObj().getLetter() == shapeLetters[j]) {
+                    isShapeInArray[j] = true;
+                } // end if
             } // end for
         } // end for
-        
+ 
         // checking to see if all shapes are in the array
         for(int i = 0; i < isShapeInArray.length; i++) {
             if(!isShapeInArray[i]) {
