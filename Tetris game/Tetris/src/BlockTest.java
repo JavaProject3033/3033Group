@@ -409,4 +409,34 @@ class BlockTest {
         assertNotEquals(i.getColor(), z.getColor());
     }
     
+    @Test
+    void testIsValidShapePoint1() {
+        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1);
+        
+        assertTrue(b.isValidShapePoint(b.getPoints()[0], b.getPoints()[1]));
+    }
+    
+    @Test
+    void testIsValidShapePoint2() {
+        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1);
+        b.getShape()[b.getFirstPoint()[0]][b.getFirstPoint()[1]] = false;
+        
+        assertFalse(b.isValidShapePoint(b.getPoints()[0], b.getPoints()[1]));
+    }
+    
+    @Test
+    void testGetFirstPointIndex1() {
+        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1);
+        
+        assertEquals(0, b.getFirstPointIndex());
+    }
+    
+    @Test
+    void testGetFirstPointIndex2() {
+        Block b = new Block(new BlockColor(5), new Shape('i', 1), 0, 0, 1);
+        b.getShape()[b.getFirstPoint()[0]][b.getFirstPoint()[1]] = false;
+        
+        assertEquals(2, b.getFirstPointIndex());
+    }
+    
 } // end BlockColorTest

@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 import javafx.scene.paint.*;
 
 class Block {
@@ -64,24 +66,7 @@ class Block {
 	}
 	
 	void rotate() {
-	    int[] originalFirstPoint = new int[2];
-	    boolean[][] originalShape = shape.getShape();
-	    boolean found = false;
-	    
-	    for(int r = 0; r < originalShape.length; r ++) {
-	        for(int c = 0; c < originalShape[0].length; c ++) {
-	            if(originalShape[r][c]) {
-	                originalFirstPoint[0] = r;
-	                originalFirstPoint[1] = c;
-	                found = true;
-	                break;
-	            } // end if
-	        } // end for
-	        
-	        if(found) {
-	            break;
-	        } // end if
-	    } // end for
+	    int[] originalFirstPoint = getFirstPoint();
 	    
 	    int originRow = points[0] - originalFirstPoint[0]; // first row of the shape array (NOT the first block in the shape)
 	    int originCol = points[1] - originalFirstPoint[1]; // first column of the shape array
@@ -166,5 +151,86 @@ class Block {
 		
 	    points[0] = newR;
 	    points[1] = newC;
+	}
+	
+	public boolean equals(Block other) {
+	    boolean sameColor = color.getColor() == other.getColorNum();
+	    boolean samePoints = Arrays.equals(points, other.getPoints());
+	    boolean sameShape = shape.getLetter() == other.getShapeObj().getLetter();
+	    boolean sameOrientation = orientation == other.getOrientation();
+	    
+	    return sameColor && samePoints && sameShape && sameOrientation;
+	}
+	
+	public int[] getFirstPoint() {
+	    int[] firstPoint = {-1, -1};
+        boolean[][] shapeArr = shape.getShape();
+        boolean found = false;
+        
+        for(int r = 0; r < shapeArr.length; r ++) {
+            for(int c = 0; c < shapeArr[0].length; c ++) {
+                if(shapeArr[r][c]) {
+                    firstPoint[0] = r;
+                    firstPoint[1] = c;
+                    found = true;
+                    break;
+                } // end if
+            } // end for
+            
+            if(found) {
+                break;
+            } // end if
+        } // end for
+        
+        return firstPoint;
+	}
+	
+	public int getFirstPointIndex() {
+        int currentPoint = 0;
+        boolean[][] shapeArr = shape.getShape();
+        boolean[][] normalShapeArr = (new Shape(shape.getLetter(), orientation)).getShape();
+        
+        for(int r = 0; r < shapeArr.length; r ++) {
+            for(int c = 0; c < shapeArr[0].length; c ++) {
+                if(shapeArr[r][c]) {
+                    return currentPoint;
+                } // end if
+                
+                if(normalShapeArr[r][c] && !shapeArr[r][c]) {
+                    currentPoint += 2;
+                } // end if
+            } // end for
+            
+            
+        } // end for
+        
+        return -1;
+	}
+	
+	public boolean isValidShapePoint(int r, int c) {
+	    int[] firstPoint = getFirstPoint();
+	    int firstPointIndex = getFirstPointIndex();
+	    int[] originPoint = {points[firstPointIndex] - firstPoint[0], points[firstPointIndex + 1] - firstPoint[1]}; // the location on the board where the 0,0 in the shape array is at
+	    
+	    int shapeRow = r - originPoint[0];
+	    int shapeCol = c - originPoint[1];
+
+/*
+	    System.out.println("\n" + shape.getLetter());
+	    System.out.println("first pt index: " + firstPointIndex);
+	    System.out.println("point r: " + points[firstPointIndex]);
+        System.out.println("point c: " + points[firstPointIndex + 1]);
+	    System.out.println("first r: " + firstPoint[0]);
+        System.out.println("first c: " + firstPoint[1]);
+        System.out.println("origin r: " + originPoint[0]);
+        System.out.println("origin c: " + originPoint[1]);
+	    System.out.println("given row: " + r);
+	    System.out.println("given col: " + c);
+	    System.out.println("shape row: " + shapeRow);
+	    
+	    System.out.println("shape col: " + shapeCol); 
+	    */
+	    
+	    return shape.getShape()[shapeRow][shapeCol];
 	}
 }
