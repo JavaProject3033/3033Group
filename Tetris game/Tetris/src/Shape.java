@@ -120,6 +120,7 @@ public class Shape {
 
        	public final static int NUM_SHAPES = 7;
        	private boolean [][] shape;
+       	private char letter;
        	
        	private final static String shapeLetters = "OILSZJT"; // used in combination with shapes[] to access the shapes more easily
        	private final static boolean[][][][] shapes = {O, I, L, S, Z, J, T};
@@ -141,8 +142,10 @@ public class Shape {
         int shapesIndex = shapeLetters.indexOf(Character.toUpperCase(shape));
         int numRows = shapes[shapesIndex][0].length;
         int numCols = shapes[shapesIndex][0][0].length;
-        
-	    this.shape = new boolean[numRows][numCols];
+        this.shape = new boolean[numRows][numCols];
+	    
+        letter = Character.toUpperCase(shape);
+	    
 		setShape(shape, orientation);
 	}
 	private void arraycopy2D(boolean[][] src, int srcPos, boolean[][]  dst,int destPos, int length)
@@ -256,5 +259,33 @@ public class Shape {
 	public boolean[][] getShape()
 	{
 		return shape;
+	}
+	
+	public void setLetter(char l) {
+	    letter = l;
+	} 
+	
+	public char getLetter() {
+	    return letter;
+	}
+	
+	public String toString() {
+	    String shapeStr = "";
+        
+        for(int r = 0; r < shape.length; r ++) {
+            for(int c = 0; c < shape[0].length; c ++) {
+                if(shape[r][c]) {
+                    shapeStr += "# ";
+                }
+                
+                else {
+                    shapeStr += ". ";
+                }
+            }
+            
+            shapeStr += "\n";
+        }
+        
+        return shapeStr;
 	}
 }
