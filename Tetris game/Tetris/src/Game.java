@@ -21,32 +21,32 @@ import javafx.animation.*;
 import javafx.event.*;
 
 public class Game {
-    public final static KeyCode ROTATE_RIGHT = KeyCode.Z;
-    public final static KeyCode ROTATE_LEFT = KeyCode.X;
+    public final static KeyCode ROTATE_RIGHT = KeyCode.X;
+    public final static KeyCode ROTATE_LEFT = KeyCode.Z;
     public final static KeyCode LEFT = KeyCode.LEFT;
     public final static KeyCode RIGHT = KeyCode.RIGHT;
     public final static KeyCode DROP = KeyCode.DOWN;
     
-    private final int FALL_SPEED = 500; // default fall speed for the blocks in ms
+    private final int FALL_SPEED = 1000; // default fall speed for the blocks in ms
     private int dropSpeed;
     private final double DROP_SPEED_MULTIPLIER = 0.5; // drop speed in relation to the fall speed
     private double speedMultiplier;
-    private double SIDE_PANE_WIDTH = 0.15 * GameLauncher.WINDOW_WIDTH;
+    private double SIDE_PANE_WIDTH = 0.30 * GameLauncher.WINDOW_WIDTH;
     private static final int POINTS_ARR_LEN = 8;
     
     private boolean exitGame;
     private int squareSideLength; // used for drawing the blocks
 //    private final Rectangle[] squares; // GUI representation of the possible squares that make up the board.
     
-    Score score;
-    Board board;
+    private Score score;
+    private Board board;
     
     public Game() {
         speedMultiplier = 1;
         exitGame = false;
         score = new Score();
         dropSpeed = (int) (FALL_SPEED * DROP_SPEED_MULTIPLIER);
-        squareSideLength = 20;
+        squareSideLength = (GameLauncher.WINDOW_HEIGHT - 20) / Board.ROWS;
         board = new Board(FALL_SPEED, dropSpeed, squareSideLength);
         
 //        squares = new Rectangle[BlockColor.NUM_COLORS + 1];
@@ -64,17 +64,18 @@ public class Game {
         
         // INSTRUCTIONS
         Label instructionsLabel = new Label(
-                "INSTRUCTIONS:\n" + 
+                "INSTRUCTIONS:\n" +  
                 "Game ends when the blocks get past the top row.\n" + 
                 "Clear blocks by filling up rows or touching similar colors.\n" +
                 "Get higher scores by surviving longer.\n" + 
                 "\n" + 
                 "CONTROLS:\n" +
                 "←, →\tmove blocks left and right\n" + 
-                "↓\tdrop blocks\n" + 
-                "z\trotate left" + 
-                "x\trotate right"
+                "↓\t\tdrop blocks\n" + 
+                "z\t\trotate left\n" + 
+                "x\t\trotate right"
                 );
+        instructionsLabel.setWrapText(true);
         
         // SCORE AND INSTRUCTIONS ARE ON LEFT SIDE OF THE WINDOW
         VBox leftPane = new VBox(GameLauncher.ITEM_SPACING, scoreLabel, instructionsLabel);
@@ -108,6 +109,7 @@ public class Game {
         // automatic falling blocks handler
         Timeline blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED * speedMultiplier), e -> {
             moveDownOne(board.getCurrent());
+            setBoardPane(boardPane);
             
             // increase speed of blocks once certain score thresholds have been met
             if(score.getScore() == 30) 
@@ -121,39 +123,42 @@ public class Game {
             
             if(score.getScore() == 90)
                 speedMultiplier = 2.5;
+            
+            if(board.isAtBottom(board.current)) {
+             // check for rows and colors to clear
+                board.clearRow();
+                board.clearColors();
+                
+                // remove any blank blocks from the board
+                board.removeBlankBlocks();
+                
+                // move floating blocks down
+                // TODO may may not need this if the clear colors and stuff does this...
+                
+                // put the next block on the board
+                board.nextBlock(); 
+                score.increaseScore(1); // increase score by 1 for every block that the user gets on the board
+                
+                // update the preview panes
+                // set the first preview to the block after the current block in the futureBlocks array
+                setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
+                
+                // set the second preview to the block after the first preview
+                setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
+                
+                // checking for game over condition
+                // game over occurs when a block can't move down AND one of its points is above the top of the board
+                if(board.isAtBottom(board.getCurrent()) && !isValidBlock(board.getCurrent())) { 
+                    stage.setScene(nextScene);
+                } // end if
+            }
         }));
         
         blockFallingTimeline.play();
         
-        // check for rows and colors to clear
-        board.clearRow();
-        board.clearColors();
-        
-        // remove any blank blocks from the board
-        board.removeBlankBlocks();
-        
-        // move floating blocks down
-        // TODO may may not need this if the clear colors and stuff does this...
-        
-        // put the next block on the board
-        board.nextBlock(); 
-        score.increaseScore(1); // increase score by 1 for every block that the user gets on the board
-        
-        // update the preview panes
-        // set the first preview to the block after the current block in the futureBlocks array
-        setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
-        
-        // set the second preview to the block after the first preview
-        setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
-        
-        // checking for game over condition
-        // game over occurs when a block can't move down AND one of its points is above the top of the board
-        if(isAtBottom(board.getCurrent()) && !isValidBlock(board.getCurrent())) { 
-            stage.setScene(nextScene);
-        } // end if
-        
         // MAIN PANE
         HBox mainPane = new HBox(GameLauncher.ITEM_SPACING, leftPane, boardPane, rightPane);
+        mainPane.setAlignment(Pos.CENTER);
         
         // EVENT HANDLERS
         mainPane.setOnKeyPressed(e -> {
@@ -210,10 +215,14 @@ public class Game {
     } // end newRectangle
     
     public void moveDownOne(Block b) {
-        if(!isAtBottom(b)) {
-            int currentX = b.getPoints()[0];
-            int newY = b.getPoints()[1];
-            b.updatePoints(currentX, newY);
+        if(!board.isAtBottom(b)) {
+            System.out.println("not at bottom; can move down one");
+            int newR = b.getPoints()[0] + 1;
+            int currentC = b.getPoints()[1];
+            
+            setBoardArray(b, false);
+            b.updatePoints(newR, currentC);
+            setBoardArray(b, true);
         } // end if
     } // end moveDownOne
     
@@ -221,12 +230,70 @@ public class Game {
         int[] points = b.getPoints();
         
         for(int i = 0; i < points.length; i += 2) {
-            board.getBoard()[i][i + 1] = occupied;
+            board.getBoard()[points[i]][points[i + 1]] = occupied;
         } // end for
     } // end updateBoard
     
     public boolean isValidMove(Block b, KeyCode move) {
         BlockColor bColor = new BlockColor(b.getColorNum());
+        Shape bShape = new Shape(b.getShapeObj().getLetter(), b.getOrientation());
+        int[] bPoints = b.getPoints();
+        Block testBlock = new Block(bColor, bShape, bPoints[0], bPoints[1], b.getOrientation()); // create a copy of the block to test rotate
+        
+        System.out.println("orig points: " + Arrays.toString(bPoints));
+        System.out.println("test points (before): " + Arrays.toString(testBlock.getPoints()));
+        
+        // performing the move on the test block
+        switch (move) {
+            case LEFT: // move left
+                testBlock.moveLeft();
+                break;
+                
+            case RIGHT: // move right
+                testBlock.moveRight();
+                break;
+                
+            case Z: // rotate left
+                testBlock.rotateLeft();
+                break;
+                
+            case X: // rotate right
+                testBlock.rotateRight();
+                break;
+                
+            default:
+                return false;
+        } // end switch
+        
+        System.out.println("test points (after): " + Arrays.toString(testBlock.getPoints()));
+        
+        // checking to see if the move resulted in valid points
+        //return isValidBlock(testBlock);
+        
+        int[] testPoints = testBlock.getPoints();
+        Block[][] locations = board.generateBlockLocations();
+        
+        for(int i = 0; i < testPoints.length; i += 2) {
+            System.out.println("points: " + testPoints[i] + " " + testPoints[i + 1]);
+            
+            if(!board.isValidLocation(testPoints[i], testPoints[i + 1])) { // goes off the board
+                System.out.println("INVALID LOC");
+                return false;
+            } // end if
+            
+            // if it is on the board
+            Block current = locations[testPoints[i]][testPoints[i + 1]];
+            System.out.println("current: " + current + "\t" + b + " ");
+            System.out.println("null " + (current == null));
+            if(current != null && current != b) { // if the rotation leads the block to occupy a non-null space or a space occupied by another block
+                System.out.println("IN NON-NULL SPACE OR SPACE WITH ANOTHER BLOCK");
+                return false;                
+            } // end if
+        } // end for
+        
+        return true;
+        
+/**        BlockColor bColor = new BlockColor(b.getColorNum());
         Shape bShape = b.getShapeObj();
         int[] bPoints = b.getPoints();
         Block testBlock = new Block(bColor, bShape, bPoints[0], bPoints[1], b.getOrientation()); // create a copy of the block to test rotate
@@ -254,20 +321,25 @@ public class Game {
         } // end switch
         
         // checking to see if the move resulted in valid points
-        return isValidBlock(testBlock);
+        return isValidBlock(testBlock);**/
     } // end isValidBlock
     
     public boolean isValidBlock(Block b) {
         int[] points = b.getPoints();
         
         for(int i = 0; i < points.length; i += 2) {
-            int x = points[i];
-            int y = points[i + 1];
-            
-            if(!(x >= 0 && x < Board.ROWS && y >= 0 && y < Board.COLS)) // not within bounds of the board
+            if(!board.isValidLocation(points[i], points[i + 1])) { // checking to see if it is a valid board location first; prevents an exception when generateBoardLocation is called
                 return false;
+            } // end if
+        } // end for
+        
+        Block[][] locations = board.generateBlockLocations();
+        
+        for(int i = 0; i < points.length; i += 2) {
+            int r = points[i];
+            int c = points[i + 1];
             
-            if(!(board.getBoard()[x][y])) // overlapping with any other blocks
+            if(!b.isValidShapePoint(r, c) || locations[r][c] == b || locations[r][c] != null) // not within bounds of the board and not overlapping with other blocks
                 return false;
         } // end for
         
@@ -288,7 +360,7 @@ public class Game {
                 else // otherwise there is no square
                     square = newRectangle(BlockColor.NUM_COLORS);
                 
-                pane.add(square, r, c);
+                pane.add(square, c, r);
             } // end for
         } // end for
     } // end setPreview
@@ -297,7 +369,7 @@ public class Game {
         // filling pane with white squares first
         for(int r = 0; r < Board.ROWS; r ++) {
             for(int c = 0; c < Board.COLS; c ++) {
-                pane.add(newRectangle(BlockColor.NUM_COLORS), r, c);
+                pane.add(newRectangle(BlockColor.NUM_COLORS), c, r);
             } // end for
         } // end for
         
@@ -318,30 +390,6 @@ public class Game {
             } // end for
         } // end for
     } // end setBoardPane
-    
-    public boolean isAtBottom(Block b) {
-        int maxY = -1;
-        
-        // finding the largest y value among the points in block b. (This means they are on the "bottom" of the block.)
-        for(int i = 1; i < POINTS_ARR_LEN; i += 2) {
-            int currentY = b.getPoints()[i];
-            
-            if(currentY > maxY)
-                maxY = currentY;
-        } // end for
-        
-        // finding the other points with a y value the same as the maximum y value and checking to see if any of the bottom points have a square below them
-        for(int i = 0; i < POINTS_ARR_LEN; i += 2) {
-            int currentX = b.getPoints()[i];
-            int currentY = b.getPoints()[i + 1];
-            
-         // this is a bottom point and there is a square below it on the board (or the board bottom)
-            if(currentY == maxY && (board.getBoard()[currentX][currentY + 1] || currentY == Board.ROWS - 1)) 
-                return true;
-        } // end for
-        
-        return false;
-    } // end isAtBottom
     
     public void setSpeedMultiplier(double multiplier) {
         speedMultiplier = multiplier;
