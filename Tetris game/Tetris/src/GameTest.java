@@ -5,15 +5,14 @@
  */
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
 import java.util.Arrays;
+import org.junit.jupiter.api.*;
 
 public class GameTest {
     static Game g;
     
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         g = new Game();
     } // end setup
     
@@ -70,14 +69,19 @@ public class GameTest {
         
         boolean[][] expectedBoard = new boolean[Board.ROWS][Board.COLS];
         for(int r = 0; r < Board.ROWS; r ++) {
-            expectedBoard[r] = Arrays.copyOf(b.getBoard()[r], Board.ROWS);
+            expectedBoard[r] = Arrays.copyOf(b.getBoard()[r], Board.COLS);
         } // end for
         
         Block[] expectedBlocks = Arrays.copyOf(b.getBlocks(), b.getBlocks().length);
         
         g.setBoard(b);
         
+        System.out.println("actual before: " + b);
+        
         g.moveDownOne(j1);
+        
+        System.out.println("actual after: " + b);
+        System.out.println("expected: " + expectedBoard);
         
         // checking to see if the board array is the same
         for(int r = 0; r < Board.ROWS; r ++) {
@@ -109,8 +113,13 @@ public class GameTest {
             expectedBoard.addBlock(expectedBlocks[k]);
         } // end for
         
+        System.out.println("actual before: " + b);
+        
         g.setBoard(b);
         g.moveDownOne(j1);
+        
+        System.out.println("actual after: " + b);
+        System.out.println("expected: " + expectedBoard);
         
         // checking to see if the board array is the same
         for(int r = 0; r < Board.ROWS; r ++) {
@@ -121,7 +130,7 @@ public class GameTest {
         Block[] actualBlocks = b.getBlocks();
         boolean containsCorrectBlock = false;
         
-        for(int j = 0; j < actualBlocks.length; j ++) {
+        for(int j = 0; j < b.getBlocksLength(); j ++) {
             if(actualBlocks[j].equals(j1expected)) {
                 containsCorrectBlock = true;
             } // end if
@@ -136,6 +145,7 @@ public class GameTest {
         Block j1 = new Block(new BlockColor(1), new Shape('j', 3), 16, 3, 3);
         b.addBlock(j1);
         g.setBoard(b);
+        
         g.setBoardArray(j1, false);
         
         Board expected = new Board();
@@ -152,7 +162,7 @@ public class GameTest {
         Block z = b.getBlocks()[6];
         g.setBoard(b);
         
-        assertTrue(g.isValidMove(z, Game.RIGHT));
+        assertFalse(g.isValidMove(z, Game.RIGHT));
     }
     
     @Test
@@ -161,7 +171,7 @@ public class GameTest {
         Block z = b.getBlocks()[6];
         g.setBoard(b);
         
-        assertFalse(g.isValidMove(z, Game.LEFT));
+        assertTrue(g.isValidMove(z, Game.LEFT));
     }
     
     @Test
@@ -179,7 +189,7 @@ public class GameTest {
         Block z = b.getBlocks()[6];
         g.setBoard(b);
         
-        assertFalse(g.isValidMove(z, Game.ROTATE_LEFT));
+        assertTrue(g.isValidMove(z, Game.ROTATE_LEFT));
     }
     
     @Test
@@ -206,7 +216,7 @@ public class GameTest {
         Block s = b.getBlocks()[2];
         g.setBoard(b);
         
-        assertTrue(g.isValidMove(s, Game.ROTATE_LEFT));
+        assertFalse(g.isValidMove(s, Game.ROTATE_LEFT));
     }
     
     @Test
@@ -215,25 +225,7 @@ public class GameTest {
         Block s = b.getBlocks()[2];
         g.setBoard(b);
         
-        assertFalse(g.isValidMove(s, Game.ROTATE_RIGHT));
-    }
-    
-    @Test
-    void testIsAtBottom1() {
-        Board b = BoardTest.generateb3();
-        b.removeBlock(5);
-        g.setBoard(b);
-        
-        assertFalse(g.isAtBottom(b.getBlocks()[5]) /*z*/);
-    }
-    
-    @Test
-    void testIsAtBottom2() {
-        Board b = BoardTest.generateb3();
-        b.removeBlock(5);
-        g.setBoard(b);
-        
-        assertFalse(g.isAtBottom(b.getBlocks()[4]) /*t*/);
+        assertTrue(g.isValidMove(s, Game.ROTATE_RIGHT));
     }
     
     @Test
@@ -259,6 +251,8 @@ public class GameTest {
         Board b = BoardTest.generateb3();
         Block z = new Block(new BlockColor(0), new Shape('z', 0), 18, 0, 0);
         g.setBoard(b);
+        
+        System.out.println("board: \n" + b);
         
         assertFalse(g.isValidBlock(z));
     }
