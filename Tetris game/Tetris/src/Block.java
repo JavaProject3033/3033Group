@@ -65,32 +65,15 @@ class Block {
 	    return shape;
 	}
 	
-	void rotate() {
+	void rotate() {	    
 	    int[] originalFirstPoint = getFirstPoint();
-	    
-	    int originRow = points[0] - originalFirstPoint[0]; // first row of the shape array (NOT the first block in the shape)
+	    int originRow = points[0] - originalFirstPoint[0]; // first row of the shape array (NOT the first square in the shape)
 	    int originCol = points[1] - originalFirstPoint[1]; // first column of the shape array
-	    
-		int i = 0;
-		int j = 0;
-		boolean pointFound = false;
-		int tempPointX = 0;
-		int tempPointY = 0;
+
 		shape.setShape(orientation);
-		boolean[][] tempShape = shape.getShape();
-		for(i = 0; i < tempShape.length; i++) {
-			for(j = 0; j < tempShape[0].length; j++) {
-				if(!pointFound) {
-					if (tempShape[i][j] == true) {
-						pointFound = true;
-						tempPointX = i;
-						tempPointY = j;
-					}
-				}
-			}
-		}
-	
-		updatePoints(tempPointX + originRow, tempPointY + originCol);
+		
+		int[] newFirstPoint = getFirstPoint();
+		updatePoints(newFirstPoint[0] + originRow, newFirstPoint[1] + originCol);
 	}
 	void rotateRight() {
 		orientation++;
@@ -109,21 +92,17 @@ class Block {
 	}
 	
 	void moveLeft() {
-		if(points[1] > 0 && points[3] > 0 && points[5] > 0 && points[7] > 0) {
-			points[1]--;
-			points[3]--;
-			points[5]--;
-			points[7]--;
-		}
+		points[1]--;
+		points[3]--;
+		points[5]--;
+		points[7]--;
 	}
 	
 	void moveRight() {
-		if(points[1] < 9 && points[3] < 9 && points[5] < 9 && points[7] < 9) {
-			points[1]++;
-			points[3]++;
-			points[5]++;
-			points[7]++;
-		}
+		points[1]++;
+		points[3]++;
+		points[5]++;
+		points[7]++;
 	}
 	
 	boolean isSameColor(Block otherBlock) {
@@ -165,21 +144,15 @@ class Block {
 	public int[] getFirstPoint() {
 	    int[] firstPoint = {-1, -1};
         boolean[][] shapeArr = shape.getShape();
-        boolean found = false;
         
         for(int r = 0; r < shapeArr.length; r ++) {
             for(int c = 0; c < shapeArr[0].length; c ++) {
                 if(shapeArr[r][c]) {
                     firstPoint[0] = r;
                     firstPoint[1] = c;
-                    found = true;
-                    break;
+                    return firstPoint;
                 } // end if
             } // end for
-            
-            if(found) {
-                break;
-            } // end if
         } // end for
         
         return firstPoint;
@@ -189,14 +162,15 @@ class Block {
         int currentPoint = 0;
         boolean[][] shapeArr = shape.getShape();
         boolean[][] normalShapeArr = (new Shape(shape.getLetter(), orientation)).getShape();
-        
+
         for(int r = 0; r < shapeArr.length; r ++) {
             for(int c = 0; c < shapeArr[0].length; c ++) {
                 if(shapeArr[r][c]) {
+                    
                     return currentPoint;
                 } // end if
                 
-                if(normalShapeArr[r][c] && !shapeArr[r][c]) {
+                else if(normalShapeArr[r][c]) {
                     currentPoint += 2;
                 } // end if
             } // end for
@@ -213,10 +187,11 @@ class Block {
 	    int[] originPoint = {points[firstPointIndex] - firstPoint[0], points[firstPointIndex + 1] - firstPoint[1]}; // the location on the board where the 0,0 in the shape array is at
 	    
 	    int shapeRow = r - originPoint[0];
-	    int shapeCol = c - originPoint[1];
+	    int shapeCol = c - originPoint[1]; 
 
-/*
+/**
 	    System.out.println("\n" + shape.getLetter());
+	    System.out.println(shape);
 	    System.out.println("first pt index: " + firstPointIndex);
 	    System.out.println("point r: " + points[firstPointIndex]);
         System.out.println("point c: " + points[firstPointIndex + 1]);
@@ -229,8 +204,8 @@ class Block {
 	    System.out.println("shape row: " + shapeRow);
 	    
 	    System.out.println("shape col: " + shapeCol); 
-	    */
-	    
-	    return shape.getShape()[shapeRow][shapeCol];
+	    **/
+
+	    return shape.getShape()[shapeRow][shapeCol]; 
 	}
 }

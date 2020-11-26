@@ -35,6 +35,7 @@ public class Board
         dropBlockSpeed = 0;
         squareSideLength = 0;
         current = futureBlocks[0];
+        addBlock(current); //TODO
         currentBlockIndex = 0;
     }
     
@@ -299,10 +300,10 @@ public class Board
         int[] points = b.getPoints();
         
         for(int i = 0; i < points.length; i += 2) {
-            int x = points[i];
-            int y = points[i + 1];
+            int r = points[i];
+            int c = points[i + 1];
 
-            board[x][y] = true;
+            board[r][c] = true;
         } // end for
     } // end addBlock
     
@@ -371,7 +372,7 @@ public class Board
             
             for(int j = 0; j < points.length; j += 2) {
                 if(isValidLocation(points[j], points[j + 1]) && current.isValidShapePoint(points[j], points[j + 1])) {
-                    locations[points[j]][points[j + 1]] = current;
+                    locations[points[j]][points[j + 1]] = current; 
                 } // end if
             } // end for
         } // end for

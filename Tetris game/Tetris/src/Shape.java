@@ -10,7 +10,7 @@ public class Shape {
                                     	 {true, true}},
 
                                     	 {{true, true},
-                                    	  {true, true}},
+                                    	  {true, true}}, 
 
                                     	  {{true, true},
                                     	   {true, true}}

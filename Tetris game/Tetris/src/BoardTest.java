@@ -9,10 +9,9 @@
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import org.junit.jupiter.api.*;
-import javafx.scene.paint.*;
 
 public class BoardTest {
-    static Board b1, b2;
+    static Board b1, b2; 
     
     static boolean[][][][] allShapes = {Shape.O, Shape.I, Shape.S, Shape.Z, Shape.L, Shape.J, Shape.T};
     static char[] shapeLetters = {'O', 'I', 'S', 'Z', 'L', 'J', 'T'};
@@ -22,7 +21,7 @@ public class BoardTest {
         b1 = new Board();
         b2 = new Board(1, 2, 30);
     } // end setup
-    
+     
     // checking that board is initialized to all zeros
     @Test
     void testDefaultConstructor1() {

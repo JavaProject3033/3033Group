@@ -9,7 +9,7 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
-class BlockTest {
+class BlockTest { 
     static Block b1, i, j, z;
     
     @BeforeEach
