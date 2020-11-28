@@ -12,7 +12,6 @@ import javafx.scene.text.*;
 import javafx.stage.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
-import javafx.scene.web.*;
 import javafx.geometry.*;
 
 public class GameLauncher extends Application {
@@ -21,14 +20,19 @@ public class GameLauncher extends Application {
     public static final int WINDOW_HEIGHT = (int) (WINDOW_WIDTH * 0.7);
     public static Game game;
     
+    private static Label newHighScoreLabel; // Game class needs access to these
+    private static Label scoreLabel;
+    private static Score score;
+    
     @Override
     public void start(Stage stage) {
-        Score score = new Score();
-        Sound sound = new Sound(0.20);
+        score = new Score();
+        Sound sound = new Sound(0.05);
         game = new Game();
         
         // PROGRAM MAIN MENU
         // play music
+        sound.playSong();
         
         // display game name
         Label gameNameLabel = new Label("TETRIS");
@@ -45,13 +49,11 @@ public class GameLauncher extends Application {
         
         // credit for music
         int creditFontSize = 12;
-        
-        WebView browser = new WebView();
-        WebEngine engine = browser.getEngine();
-        Hyperlink musicCreditLink = new Hyperlink("Music created by Bogozi");
-        Hyperlink musicLicenseLink = new Hyperlink("Licensed under the Creative Commons Attribution-Share Alike 3.0 Unported license.");
-        musicCreditLink.setFont(new Font(creditFontSize));
-        musicLicenseLink.setFont(new Font(creditFontSize));
+
+        Label musicCreditLabel = new Label("Music created by Bogozi");
+        Label musicLicenseLabel = new Label("Licensed under the Creative Commons Attribution-Share Alike 3.0 Unported license.");
+        musicCreditLabel.setFont(new Font(creditFontSize));
+        musicLicenseLabel.setFont(new Font(creditFontSize));
         
         VBox titlePane = new VBox(ITEM_SPACING, gameNameLabel, highScoreLabel);
         titlePane.setAlignment(Pos.CENTER);
@@ -61,7 +63,7 @@ public class GameLauncher extends Application {
         optionsPane.setAlignment(Pos.CENTER);
         optionsPane.setPadding(new Insets(30));
         
-        VBox musicAttributionPane = new VBox(0, musicCreditLink, musicLicenseLink);
+        VBox musicAttributionPane = new VBox(0, musicCreditLabel, musicLicenseLabel);
         musicAttributionPane.setAlignment(Pos.BOTTOM_CENTER);
         musicAttributionPane.setPadding(new Insets(100, 5, 5, 5));
         
@@ -82,7 +84,7 @@ public class GameLauncher extends Application {
         
         // return to main menu
         Button returnMainMenuButton = new Button("Back to Main Menu");
-        returnMainMenuButton.setAlignment(Pos.BOTTOM_CENTER);
+        returnMainMenuButton.setAlignment(Pos.BOTTOM_CENTER);  
         
         VBox optionMenuPane = new VBox(ITEM_SPACING * 5, volumePane, returnMainMenuButton);
         optionMenuPane.setAlignment(Pos.CENTER);
@@ -95,19 +97,15 @@ public class GameLauncher extends Application {
         gameOverLabel.setFont(new Font(60));
         
         // player score
-        Label scoreLabel = new Label(String.format("Your Score\t%d", game.getScore()));
-        
+        scoreLabel = new Label(String.format("Your Score\t%d", game.getScore()));
+
         // special text for new high score
-        Label newHighScoreLabel = new Label("");
-        
-        if(game.getScore() > score.getHighScore()) {
-            newHighScoreLabel.setText("CONGRATULATIONS! New high score!");
-        } // end if
+        newHighScoreLabel = new Label("");
         
         // play again button
         Button playAgainButton = new Button("Main Menu");
         
-        VBox endTextPane = new VBox(ITEM_SPACING, gameOverLabel, scoreLabel);
+        VBox endTextPane = new VBox(ITEM_SPACING, gameOverLabel, scoreLabel, newHighScoreLabel);
         endTextPane.setAlignment(Pos.CENTER);
         endTextPane.setPadding(new Insets(50));
         
@@ -146,19 +144,30 @@ public class GameLauncher extends Application {
         });
         
         playAgainButton.setOnAction(e -> {
-            stage.setScene(mainMenuScene);
-        });
-        
-        musicCreditLink.setOnAction(e -> {
-            engine.load("https://commons.wikimedia.org/wiki/File:Tetris_theme.ogg");
-        });
-        
-        musicLicenseLink.setOnAction(e -> {
-            engine.load("https://creativecommons.org/licenses/by-sa/3.0/deed.en");
+            stage.setScene(mainMenuScene); 
+            
+            if(game.getExitGame()) {
+                game.blockFallingTimeline.stop();
+            } // end if
+            
+            game = new Game();
+            highScoreLabel.setText(String.format("High Score\t%s", score.getHighScore()));
         });
         
         stage.show();
     } // end start
+    
+    public static Label getHighScoreLabel() {
+        return newHighScoreLabel;
+    } // end getHighSchoreLabel
+    
+    public static Label getScoreLabel() {
+        return scoreLabel;
+    } // end getScoreLabel
+    
+    public static Score getScore() {
+        return score;
+    } // end getScore
     
     public static void main(String args[]) {
         Application.launch(args);

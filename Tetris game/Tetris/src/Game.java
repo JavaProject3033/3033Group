@@ -6,10 +6,7 @@
 
 import javafx.scene.input.*;
 import javafx.scene.*;
-
 import java.util.Arrays;
-
-import javafx.application.*;
 import javafx.geometry.*;
 import javafx.stage.*;
 import javafx.util.Duration;
@@ -17,8 +14,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.control.*;
 import javafx.scene.shape.*;
+import javafx.scene.text.Font;
 import javafx.animation.*;
-import javafx.event.*;
 
 public class Game {
     public final static KeyCode ROTATE_RIGHT = KeyCode.X;
@@ -41,13 +38,16 @@ public class Game {
     private Score score;
     private Board board;
     
+    public Timeline blockFallingTimeline;
+    
     public Game() {
         speedMultiplier = 1;
         exitGame = false;
-        score = new Score();
+        score = GameLauncher.getScore();
         dropSpeed = (int) (FALL_SPEED * DROP_SPEED_MULTIPLIER);
         squareSideLength = (GameLauncher.WINDOW_HEIGHT - 20) / Board.ROWS;
         board = new Board(FALL_SPEED, dropSpeed, squareSideLength);
+        System.out.println(board.getCurrent().getPoints()[0] + " " + board.getCurrent().getPoints()[1]);
         
 //        squares = new Rectangle[BlockColor.NUM_COLORS + 1];
         
@@ -59,28 +59,42 @@ public class Game {
     } // end Game default constructor
     
     public void playGame(Stage stage, Scene nextScene) {
+        int smallFontSize = 10;
+        int largeFontSize = 25;
+        
         // SCORE
-        Label scoreLabel = new Label(String.format("SCORE\n%d", score.getScore()));
+        Label scoreTitleLabel = new Label("SCORE: ");
+        scoreTitleLabel.setFont(new Font(smallFontSize));
+        
+        Label scoreLabel = new Label("" + score.getScore());
+        scoreLabel.setFont(new Font(largeFontSize));
         
         // INSTRUCTIONS
-        Label instructionsLabel = new Label(
-                "INSTRUCTIONS:\n" +  
-                "Game ends when the blocks get past the top row.\n" + 
-                "Clear blocks by filling up rows or touching similar colors.\n" +
-                "Get higher scores by surviving longer.\n" + 
-                "\n" + 
-                "CONTROLS:\n" +
+        Label instructionsTitleLabel1 = new Label("INSTRUCTIONS:");
+        Label instructionsTextLabel1 = new Label(
+                "• Game ends when the blocks get past the top row.\n" + 
+                "• Clear blocks by filling up rows or touching similar colors.\n" +
+                "• Get higher scores by surviving longer.\n" + 
+                "\n\n"        
+                );
+        Label instructionsTitleLabel2 = new Label("CONTROLS:");
+        Label instructionsTextLabel2 = new Label(
                 "←, →\tmove blocks left and right\n" + 
                 "↓\t\tdrop blocks\n" + 
                 "z\t\trotate left\n" + 
                 "x\t\trotate right"
                 );
-        instructionsLabel.setWrapText(true);
+        
+        instructionsTextLabel1.setWrapText(true);
+        instructionsTextLabel2.setWrapText(true);
+        instructionsTitleLabel1.setFont(new Font(largeFontSize));
+        instructionsTitleLabel2.setFont(new Font(largeFontSize));
         
         // SCORE AND INSTRUCTIONS ARE ON LEFT SIDE OF THE WINDOW
-        VBox leftPane = new VBox(GameLauncher.ITEM_SPACING, scoreLabel, instructionsLabel);
+        VBox leftPane = new VBox(GameLauncher.ITEM_SPACING, scoreTitleLabel, scoreLabel, instructionsTitleLabel1, instructionsTextLabel1, instructionsTitleLabel2, instructionsTextLabel2);
         leftPane.setAlignment(Pos.TOP_LEFT);
         leftPane.setPrefWidth(SIDE_PANE_WIDTH);
+        leftPane.setPadding(new Insets(GameLauncher.ITEM_SPACING * 2));
         
         // GAME BOARD
         double boardPadding = GameLauncher.WINDOW_HEIGHT * 0.10;
@@ -92,78 +106,107 @@ public class Game {
         
         // PREVIEW OF BLOCKS
         // user can preview the next two blocks
-        Label previewLabel = new Label("NEXT BLOCKS: ");
+        Label previewLabel = new Label("NEXT BLOCK: ");
+        previewLabel.setFont(new Font(largeFontSize));
         
         // the previews are made of GridPanes
         GridPane preview1Pane = new GridPane();
         preview1Pane.setAlignment(Pos.CENTER);
-        GridPane preview2Pane = new GridPane();
-        preview1Pane.setAlignment(Pos.CENTER);
+        setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
+//        GridPane preview2Pane = new GridPane();
+//        preview1Pane.setAlignment(Pos.CENTER);
         
-        VBox rightPane = new VBox(GameLauncher.ITEM_SPACING, previewLabel, preview1Pane, preview2Pane);
-        rightPane.setAlignment(Pos.TOP_RIGHT);
+        VBox rightPane = new VBox(GameLauncher.ITEM_SPACING, previewLabel, preview1Pane);
+        rightPane.setAlignment(Pos.TOP_LEFT);
         rightPane.setPrefWidth(SIDE_PANE_WIDTH);
+        rightPane.setPadding(new Insets(GameLauncher.ITEM_SPACING * 2));
         
         // BLOCKS WILL FALL AUTOMATICALLY ...
         // ... until they reach the bottom of the board.
         // automatic falling blocks handler
-        Timeline blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED * speedMultiplier), e -> {
-            moveDownOne(board.getCurrent());
-            setBoardPane(boardPane);
-            
-            // increase speed of blocks once certain score thresholds have been met
-            if(score.getScore() == 30) 
-                speedMultiplier = 1.25;
-            
-            if(score.getScore() == 50)
-                speedMultiplier = 1.5;
-            
-            if(score.getScore() == 70)
-                speedMultiplier = 2;
-            
-            if(score.getScore() == 90)
-                speedMultiplier = 2.5;
-            
-            if(board.isAtBottom(board.current)) {
-             // check for rows and colors to clear
-                board.clearRow();
-                board.clearColors();
+        blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED * speedMultiplier), e -> {
+            if(!exitGame) {
+                moveDownOne(board.getCurrent());
+                setBoardPane(boardPane); 
                 
-                // remove any blank blocks from the board
-                board.removeBlankBlocks();
+                scoreLabel.setText("" + score.getScore());
                 
-                // move floating blocks down
-                // TODO may may not need this if the clear colors and stuff does this...
+                // increase speed of blocks once certain score thresholds have been met
+                if(score.getScore() == 30) 
+                    speedMultiplier = 1.25;
                 
-                // put the next block on the board
-                board.nextBlock(); 
-                score.increaseScore(1); // increase score by 1 for every block that the user gets on the board
+                if(score.getScore() == 50)
+                    speedMultiplier = 1.5;
                 
-                // update the preview panes
-                // set the first preview to the block after the current block in the futureBlocks array
-                setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
+                if(score.getScore() == 70)
+                    speedMultiplier = 2;
                 
-                // set the second preview to the block after the first preview
-                setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
+                if(score.getScore() == 90)
+                    speedMultiplier = 2.5;
                 
-                // checking for game over condition
-                // game over occurs when a block can't move down AND one of its points is above the top of the board
-                if(board.isAtBottom(board.getCurrent()) && !isValidBlock(board.getCurrent())) { 
-                    stage.setScene(nextScene);
+                if(board.isAtBottom(board.current)) {
+                 // check for rows and colors to clear
+                    board.clearRow();
+                    board.clearColors();
+                    
+                    // remove any blank blocks from the board
+                    board.removeBlankBlocks();
+                    
+                    // move floating blocks down
+                    board.moveBlocksDown();
+                    
+                    // put the next block on the board
+                    board.nextBlock(); 
+                    score.increaseScore(1); // increase score by 1 for every block that the user gets on the board
+                    
+                    // update the preview panes
+                    // set the first preview to the block after the current block in the futureBlocks array
+                    if(board.getCurrentBlockIndex() >= board.getFutureBlocks().length - 1) {
+                        setPreview(preview1Pane, board.getFutureBlocks()[0]);
+                    } // end if
+                    
+                    else {
+                        setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
+                    } // end else
+                    
+                    // set the second preview to the block after the first preview
+    //                setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
+                    
+                    // checking for game over condition
+                    // game over occurs when a block can't move down AND one of its points is above the top of the board
+                    if(board.isAtBottom(board.getCurrent()) && !isValidBlock(board.getCurrent())) { 
+                        exitGame = true;
+                        
+                        GameLauncher.getScoreLabel().setText((String.format("Your Score\t%d", getScore())));
+                        
+                        if(score.getScore() > score.getHighScore()) {
+                            GameLauncher.getHighScoreLabel().setText("CONGRATULATIONS! New high score!");
+                        } // end if
+                        
+                        GameLauncher.getScore().saveHighScore();
+                        
+                        stage.setScene(nextScene);
+                    } // end if
                 } // end if
-            }
+            } // end if
         }));
         
+        blockFallingTimeline.setCycleCount(Animation.INDEFINITE);
         blockFallingTimeline.play();
         
         // MAIN PANE
         HBox mainPane = new HBox(GameLauncher.ITEM_SPACING, leftPane, boardPane, rightPane);
         mainPane.setAlignment(Pos.CENTER);
         
+        // MAIN SCENE
+        Scene scene = new Scene(mainPane, GameLauncher.WINDOW_WIDTH, GameLauncher.WINDOW_HEIGHT);
+        
         // EVENT HANDLERS
-        mainPane.setOnKeyPressed(e -> {
+        scene.setOnKeyPressed(e -> {
             KeyCode key = e.getCode();
             Block current = board.getCurrent();
+            
+            System.out.println("detected " + key);
             
             if(key == LEFT || key == RIGHT || key == Game.DROP || key == Game.ROTATE_LEFT || key == Game.ROTATE_RIGHT) {
                 setBoardArray(current, false); // specifying that where the block currently is on the board is empty
@@ -185,12 +228,12 @@ public class Game {
                         
                     case Z: // rotating block left
                         if(isValidMove(current, key))
-                            current.moveLeft();
+                            current.rotateLeft();
                         break;
                         
                     case X: // rotating block right
                         if(isValidMove(current, key))
-                            current.moveRight();
+                            current.rotateRight();
                         break;
                         
                     default:
@@ -201,8 +244,7 @@ public class Game {
             } // end if
         });
         
-        // SCENE SETUP
-        Scene scene = new Scene(mainPane, GameLauncher.WINDOW_WIDTH, GameLauncher.WINDOW_HEIGHT);
+        // DISPLAY SCENE
         stage.setScene(scene);
     } // end playGame
     
@@ -347,20 +389,19 @@ public class Game {
     } // end isValidBlock
     
     private void setPreview(GridPane pane, Block block) {
-        int numRows = block.getShapeObj().getWidth();
-        int numCols = block.getShapeObj().getHeight();
-        Rectangle square;
+        pane.getChildren().clear();
+        
         boolean[][] shape = block.getShape();
+        int numRows = shape.length;
+        int numCols = shape[0].length;
+        Rectangle square;
         
         for(int r = 0; r < numRows; r ++) {
             for(int c = 0; c < numCols; c ++) {
-                if(shape[r][c]) // if there is a square in this index
+                if(shape[r][c]) { // if there is a square in this index
                     square = newRectangle(block.getColorNum());
-                    
-                else // otherwise there is no square
-                    square = newRectangle(BlockColor.NUM_COLORS);
-                
-                pane.add(square, c, r);
+                    pane.add(square, c, r);
+                } // end if
             } // end for
         } // end for
     } // end setPreview
@@ -381,12 +422,11 @@ public class Game {
                 break;
             
             int[] points = blocks[i].getPoints();
-            // TODO currently assuming points that aren't there anymore are set to -1 ...
             for(int j = 0; j < POINTS_ARR_LEN; j += 2) { // for each point in the block
-                if(points[j] == -1)
+                if(!blocks[i].isValidShapePoint(points[j], points[j + 1]))
                     break;
                 
-                pane.add(newRectangle(blocks[i].getColorNum()), points[j], points[j + 1]);
+                pane.add(newRectangle(blocks[i].getColorNum()), points[j + 1], points[j]);
             } // end for
         } // end for
     } // end setBoardPane
