@@ -124,25 +124,26 @@ public class Game {
         // BLOCKS WILL FALL AUTOMATICALLY ...
         // ... until they reach the bottom of the board.
         // automatic falling blocks handler
-        blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED * speedMultiplier), e -> {
+        
+        blockFallingTimeline = new Timeline(new KeyFrame(Duration.millis(FALL_SPEED), e -> {
             if(!exitGame) {
-                moveDownOne(board.getCurrent());
+                moveDownOne(board.getCurrent()); 
                 setBoardPane(boardPane); 
                 
                 scoreLabel.setText("" + score.getScore());
                 
-                // increase speed of blocks once certain score thresholds have been met
-                if(score.getScore() == 30) 
-                    speedMultiplier = 1.25;
-                
-                if(score.getScore() == 50)
-                    speedMultiplier = 1.5;
-                
-                if(score.getScore() == 70)
-                    speedMultiplier = 2;
-                
-                if(score.getScore() == 90)
-                    speedMultiplier = 2.5;
+//              take this part out? Can't change the timeline KeyFrame duration while its running ...
+/*                // increase speed of blocks once certain score thresholds have been met 
+                if(score.getScore() == 30 || score.getScore() == 50 || score.getScore() == 70) {
+                    if(score.getScore() == 30)
+                        speedMultiplier = 1.25;
+                    
+                    if(score.getScore() == 50)
+                        speedMultiplier = 1.5;
+                    
+                    if(score.getScore() == 70)
+                        speedMultiplier = 2
+                } // end if*/
                 
                 if(board.isAtBottom(board.current)) {
                  // check for rows and colors to clear

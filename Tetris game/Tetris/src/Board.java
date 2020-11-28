@@ -197,11 +197,6 @@ public class Board
         	All colors should be used at least once
         	The order and color-block assignment should be random
         */
-        Random randShape = new Random();
-        Random randPoint = new Random();
-        
-        randShape.setSeed(0);
-        randPoint.setSeed(0);
 //        Random randOrientiation = new Random();
         
         
@@ -267,7 +262,43 @@ public class Board
             
             System.out.println("new points: " + Arrays.toString(points));
         } // end for
-        
+        /*
+        // checking for empty rows where the blocks are still floating
+        for(int r = 1; r < ROWS; r ++) {
+            boolean emptyRow = true;
+            boolean blocksAbove = true;
+            
+            for(int c = 0; c < COLS; c ++) {
+                if(newBoard[r][c]) {
+                    System.out.println("not empty row " + r + " at col " + c);
+                    System.out.println(Arrays.toString(newBoard[r]));
+                    emptyRow = false;
+                } // end if
+                
+                if(!newBoard[r - 1][c]) {
+                    blocksAbove = false;
+                } // end if
+            } // end for
+            
+            if(emptyRow && blocksAbove) {
+                System.out.println("empty row " + r);
+                // move all blocks above it down one
+                for(int i = 0; i < blocksLength; i ++) {
+                    int[] points = blocks[i].getPoints();
+                    
+                    if(points[0] > r) { // above the empty row, so need to move it down one
+                       blocks[i].updatePoints(points[0] + 1, points[1]);
+                    } // end if
+                } // end for
+                
+                // change the board to match
+                for(int r2 = r; r2 > 0; r2 --) {
+                    for(int c = 0; c < COLS; c ++) {
+                        newBoard[r2][c] = newBoard[r2 - 1][c];
+                    } // end for
+                } // end for
+            } // end if
+        } // end for*/
         
         board = newBoard;
     }    
