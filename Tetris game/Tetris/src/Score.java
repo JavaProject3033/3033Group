@@ -15,8 +15,10 @@ public class Score {
 
 	         while ((str = in.readLine()) != null) {
 	            this.highScore=Integer.parseInt(str);
-	            in.close();
 	         }
+	         
+	         in.close();
+	         
 	      } catch (IOException e) {
 	          // no high score, so we will create the high score file
 	          highScore = -1;

@@ -13,7 +13,7 @@ class Block {
 		shape = new Shape('O', 0);
 		points = new int[8];
 		points[0] = 0;
-		points[1] = 0;
+		points[1] = 0; 
 		orientation = 0;
 	}
 	
@@ -162,6 +162,9 @@ class Block {
         int currentPoint = 0;
         boolean[][] shapeArr = shape.getShape();
         boolean[][] normalShapeArr = (new Shape(shape.getLetter(), orientation)).getShape();
+        
+//        System.out.println("current shape arr: \n" + shape);
+//        System.out.println("normal shape arr: \n" + (new Shape(shape.getLetter(), orientation)));
 
         for(int r = 0; r < shapeArr.length; r ++) {
             for(int c = 0; c < shapeArr[0].length; c ++) {
@@ -184,13 +187,17 @@ class Block {
 	public boolean isValidShapePoint(int r, int c) {
 	    int[] firstPoint = getFirstPoint();
 	    int firstPointIndex = getFirstPointIndex();
+	    
+	    if(firstPointIndex == -1) { // no first point; blank block
+	        return false;
+	    } // end if
+	    
 	    int[] originPoint = {points[firstPointIndex] - firstPoint[0], points[firstPointIndex + 1] - firstPoint[1]}; // the location on the board where the 0,0 in the shape array is at
 	    
 	    int shapeRow = r - originPoint[0];
 	    int shapeCol = c - originPoint[1]; 
 
-/**
-	    System.out.println("\n" + shape.getLetter());
+/*	    System.out.println("\n" + shape.getLetter());
 	    System.out.println(shape);
 	    System.out.println("first pt index: " + firstPointIndex);
 	    System.out.println("point r: " + points[firstPointIndex]);
@@ -203,9 +210,24 @@ class Block {
 	    System.out.println("given col: " + c);
 	    System.out.println("shape row: " + shapeRow);
 	    
-	    System.out.println("shape col: " + shapeCol); 
-	    **/
+	    System.out.println("shape col: " + shapeCol);*/ 
+
 
 	    return shape.getShape()[shapeRow][shapeCol]; 
+	}
+	
+	public boolean isBlankBlock() {
+	    boolean isBlankBlock = true;
+        boolean[][] shapeArray = shape.getShape();
+        
+        for(int x=0; x<shapeArray.length; x++) {
+            for(int y=0; y<shapeArray[x].length; y++) {
+                if(shapeArray[x][y] == true) {
+                    isBlankBlock = false;
+                }
+            }
+        }
+        
+        return isBlankBlock;
 	}
 }

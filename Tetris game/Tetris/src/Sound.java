@@ -19,7 +19,9 @@ public class Sound {
     	this.volume=volume;
     	song=new Media(songFile.toURI().toString());
     	player=new MediaPlayer(song);
-    }
+    	player.setCycleCount(MediaPlayer.INDEFINITE);
+    	player.setVolume(volume);
+    } 
    
     public void increaseVolume()
     {
@@ -29,6 +31,8 @@ public class Sound {
     	if(volume > 1) {
     	    this.volume = 1;
     	}
+    	
+    	player.setVolume(volume);
     }
     public void decreaseVolume()
     {
@@ -38,6 +42,8 @@ public class Sound {
     	if(volume < 0) {
             this.volume = 0;
         }
+    	
+    	player.setVolume(volume);
     }
     
     public void playSong() 
