@@ -1,7 +1,12 @@
-
+/**Created by Helen Wubneh
+* Due Date 12/2/2020
+* Class CSCI-3033-001
+*/
 import javafx.scene.media.Media; 
 import javafx.scene.media.MediaPlayer; 
 import java.io.*;
+
+//This class controls music and volume 
 
 public class Sound {
     private double volume;
@@ -9,10 +14,11 @@ public class Sound {
     final double VOLUME_CHANGE_AMOUNT=0.1;
     Media song; 
     MediaPlayer player;
-    
+    //A default constructor that initalizes volume
     public Sound() {
         this(0.20);
     }
+    //A Sound constructor that initializes volume, music,song, and Player
     public Sound(double volume)
     {
         File songFile = new File(music);
@@ -22,7 +28,7 @@ public class Sound {
     	player.setCycleCount(MediaPlayer.INDEFINITE);
     	player.setVolume(volume);
     } 
-   
+    //A increaseVolume method that increase a volume by specific amount
     public void increaseVolume()
     {
     	if(volume<1)
@@ -34,6 +40,7 @@ public class Sound {
     	
     	player.setVolume(volume);
     }
+    //A decreaseVolume method that decrease a volume by specific amount
     public void decreaseVolume()
     {
     	if(volume>0)
@@ -45,16 +52,16 @@ public class Sound {
     	
     	player.setVolume(volume);
     }
-    
+    //A playSong method play the background music 
     public void playSong() 
     {
         player.play();
     }
-   
+   //getter method that returns volume
     public double getVolume() {
         return volume;
     }
-    
+    //setter method to set the volume
     public void setVolume(double v) {
         volume = v;
     }
