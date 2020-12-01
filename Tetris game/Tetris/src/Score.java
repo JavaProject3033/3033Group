@@ -1,3 +1,7 @@
+/**Created by Helen Wubneh
+* Due Date 12/2/2020
+* Class CSCI-3033-001
+*/
 import java.io.*;
 import java.io.IOException;
 
@@ -5,7 +9,7 @@ public class Score {
 
 	private int score;
 	private int highScore;
-
+        //a Score constructor that initializes score and highScore
 	public Score()
 	{
 		this.score=0;
@@ -25,12 +29,12 @@ public class Score {
 	          saveHighScore();
 	      }
 	}
-
+    //increaseScore method that increases score by given amount
     public void increaseScore(int amount)
     {
     	this.score+=amount;
     }
-
+    //SaveGighScore method that same the score into highScore if it is greater than it
     public void saveHighScore()
     {
     	if(this.score>this.highScore)
@@ -47,19 +51,14 @@ public class Score {
     	      }
     	}
     }
+    //getter method that returns score
     public int getScore()
     {
     	return score;
     }
-    /*
-     //if needed
-    public void setScore(int score)
+    //getter method that returns highScore
+    public int getHighScore()
     {
-    	this.score=score;
-    }
-    */
-
-    public int getHighScore() {
         return highScore;
     }
 }
