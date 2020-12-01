@@ -157,14 +157,17 @@ public class GameLauncher extends Application {
         stage.show();
     } // end start
     
+    // returns the high score label used for the end scene; allows the Game class to change this label
     public static Label getHighScoreLabel() {
         return newHighScoreLabel;
     } // end getHighSchoreLabel
     
+    // returns the score label used for the end scene; allows the Game class to change this label
     public static Label getScoreLabel() {
         return scoreLabel;
     } // end getScoreLabel
     
+    // returns the score object
     public static Score getScore() {
         return score;
     } // end getScore

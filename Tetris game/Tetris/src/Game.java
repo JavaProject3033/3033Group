@@ -33,13 +33,13 @@ public class Game {
     
     private boolean exitGame;
     private int squareSideLength; // used for drawing the blocks
-//    private final Rectangle[] squares; // GUI representation of the possible squares that make up the board.
     
     private Score score;
     private Board board;
     
     public Timeline blockFallingTimeline;
     
+    // creates a new game object
     public Game() {
         speedMultiplier = 1;
         exitGame = false;
@@ -48,16 +48,10 @@ public class Game {
         squareSideLength = (GameLauncher.WINDOW_HEIGHT - 20) / Board.ROWS;
         board = new Board(FALL_SPEED, dropSpeed, squareSideLength);
         System.out.println(board.getCurrent().getPoints()[0] + " " + board.getCurrent().getPoints()[1]);
-        
-//        squares = new Rectangle[BlockColor.NUM_COLORS + 1];
-        
-//        for(int i = 0; i < squares.length - 1; i++) {
-//            squares[i] = new Rectangle(squareSideLength, squareSideLength, BlockColor.COLORS[i]);
-//        } // end for
-        
-//        squares[squares.length - 1] = new Rectangle(squareSideLength, squareSideLength, Color.WHITE);
     } // end Game default constructor
     
+    // Starts up the actual game; handles game functions and GUI
+    // accepts the Stage object from the Game class and the scene that will be displayed after the game ends
     public void playGame(Stage stage, Scene nextScene) {
         int smallFontSize = 10;
         int largeFontSize = 25;
@@ -98,7 +92,6 @@ public class Game {
         
         // GAME BOARD
         double boardPadding = GameLauncher.WINDOW_HEIGHT * 0.10;
-        double boardWidth = SIDE_PANE_WIDTH * 2 + GameLauncher.ITEM_SPACING * 2;
         GridPane boardPane = new GridPane();
         boardPane.setAlignment(Pos.CENTER);
         boardPane.setPadding(new Insets(boardPadding, 0, boardPadding, 0));
@@ -113,8 +106,6 @@ public class Game {
         GridPane preview1Pane = new GridPane();
         preview1Pane.setAlignment(Pos.CENTER);
         setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
-//        GridPane preview2Pane = new GridPane();
-//        preview1Pane.setAlignment(Pos.CENTER);
         
         VBox rightPane = new VBox(GameLauncher.ITEM_SPACING, previewLabel, preview1Pane);
         rightPane.setAlignment(Pos.TOP_LEFT);
@@ -131,19 +122,6 @@ public class Game {
                 setBoardPane(boardPane); 
                 
                 scoreLabel.setText("" + score.getScore());
-                
-//              take this part out? Can't change the timeline KeyFrame duration while its running ...
-/*                // increase speed of blocks once certain score thresholds have been met 
-                if(score.getScore() == 30 || score.getScore() == 50 || score.getScore() == 70) {
-                    if(score.getScore() == 30)
-                        speedMultiplier = 1.25;
-                    
-                    if(score.getScore() == 50)
-                        speedMultiplier = 1.5;
-                    
-                    if(score.getScore() == 70)
-                        speedMultiplier = 2
-                } // end if*/
                 
                 if(board.isAtBottom(board.current)) {
                  // check for rows and colors to clear
@@ -169,9 +147,6 @@ public class Game {
                     else {
                         setPreview(preview1Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 1]);
                     } // end else
-                    
-                    // set the second preview to the block after the first preview
-    //                setPreview(preview2Pane, board.getFutureBlocks()[board.getCurrentBlockIndex() + 2]);
                     
                     // checking for game over condition
                     // game over occurs when a block can't move down AND one of its points is above the top of the board
@@ -249,6 +224,7 @@ public class Game {
         stage.setScene(scene);
     } // end playGame
     
+    // returns a new rectangle since JavaFX doesn’t allow duplicate nodes on one pane (and this program needs many of the same object)
     private Rectangle newRectangle(int color) {
         if(color < BlockColor.NUM_COLORS)
             return new Rectangle(squareSideLength, squareSideLength, BlockColor.COLORS[color]);
@@ -257,6 +233,7 @@ public class Game {
             return new Rectangle(squareSideLength, squareSideLength, Color.WHITE);
     } // end newRectangle
     
+    // moves the given block down by one index if it is not already at the bottom
     public void moveDownOne(Block b) {
         if(!board.isAtBottom(b)) {
             System.out.println("not at bottom; can move down one");
@@ -269,6 +246,7 @@ public class Game {
         } // end if
     } // end moveDownOne
     
+    // changes the board array to match the specified boolean for the points specified by the given block
     public void setBoardArray(Block b, boolean occupied) {
         int[] points = b.getPoints();
         
@@ -276,7 +254,8 @@ public class Game {
             board.getBoard()[points[i]][points[i + 1]] = occupied;
         } // end for
     } // end updateBoard
-    
+    // returns true if the block, after performing the specified move, is in the valid play area and not overlapping any blocks 
+    //      that are currently on the board. The move variable can be one of four constants: LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT
     public boolean isValidMove(Block b, KeyCode move) {
         BlockColor bColor = new BlockColor(b.getColorNum());
         Shape bShape = new Shape(b.getShapeObj().getLetter(), b.getOrientation());
@@ -335,38 +314,9 @@ public class Game {
         } // end for
         
         return true;
-        
-/**        BlockColor bColor = new BlockColor(b.getColorNum());
-        Shape bShape = b.getShapeObj();
-        int[] bPoints = b.getPoints();
-        Block testBlock = new Block(bColor, bShape, bPoints[0], bPoints[1], b.getOrientation()); // create a copy of the block to test rotate
-        
-        // performing the move on the test block
-        switch (move) {
-            case LEFT: // move left
-                testBlock.moveLeft();
-                break;
-                
-            case RIGHT: // move right
-                testBlock.moveRight();
-                break;
-                
-            case Z: // rotate left
-                testBlock.rotateLeft();
-                break;
-                
-            case X: // rotate right
-                testBlock.rotateRight();
-                break;
-                
-            default:
-                return false;
-        } // end switch
-        
-        // checking to see if the move resulted in valid points
-        return isValidBlock(testBlock);**/
     } // end isValidBlock
     
+    // returns true if the block is on valid positions on the board
     public boolean isValidBlock(Block b) {
         int[] points = b.getPoints();
         
@@ -389,6 +339,7 @@ public class Game {
         return true;
     } // end isValidBlock
     
+    // sets the given preview GridPane to the given Block
     private void setPreview(GridPane pane, Block block) {
         pane.getChildren().clear();
         
@@ -407,6 +358,7 @@ public class Game {
         } // end for
     } // end setPreview
     
+    // sets the given GridPane object to match the Game’s board object
     private void setBoardPane(GridPane pane) {
         // filling pane with white squares first
         for(int r = 0; r < Board.ROWS; r ++) {
@@ -432,30 +384,37 @@ public class Game {
         } // end for
     } // end setBoardPane
     
+    // setter for the speedMultiplier attribute
     public void setSpeedMultiplier(double multiplier) {
         speedMultiplier = multiplier;
     } // end setSpeedMultiplier
     
+    // getter for the speedMultiplier attribute
     public double getSpeedMultiplier() {
         return speedMultiplier;
     } // end getSpeedMultiplier
     
+    // setter for the exitGame variable
     public void setExitGame(boolean exit) {
         exitGame = exit;
     } // end setExitGame
     
+    // getter for the exitGame variable
     public boolean getExitGame() {
         return exitGame;
     } // end getExitGame
     
+    // setter for the board variable
     public void setBoard(Board b) {
         board = b;
     } // end setBoard
     
+    // getter for the board variable
     public Board getBoard() { 
         return board;
     } // end getBoard
     
+    // getter for the actual numerical score
     public int getScore() {
         return score.getScore();
     } // end getScore
