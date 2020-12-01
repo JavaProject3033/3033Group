@@ -6,7 +6,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer; 
 import java.io.*;
 
-//This class controls music and volume 
+//This class plays music and controls volume 
 
 public class Sound {
     private double volume;
