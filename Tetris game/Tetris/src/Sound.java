@@ -1,4 +1,4 @@
-/**Created by Helen Wubneh
+/**Author by Helen Wubneh
 * Due Date 12/2/2020
 * Class CSCI-3033-001
 */
