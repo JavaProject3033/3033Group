@@ -1,3 +1,8 @@
+/**Created by Helen Wubneh
+* Due Date 12/2/2020
+* course CSCI-3033-001
+*/
+//This class Hardcodes each shape in an array along with each of their rotations
 public class Shape {
 	private int height;
 	private int width;
@@ -125,12 +130,14 @@ public class Shape {
        	private final static String shapeLetters = "OILSZJT"; // used in combination with shapes[] to access the shapes more easily
        	private final static boolean[][][][] shapes = {O, I, L, S, Z, J, T};
 
-                   
+      // default constructor Initialize shape[][]to a COPY OF of the final static shape/orientation            
 	public Shape()
 	{
 	    this('O', 0);
 		
 	}
+	/**Initializes shape[][] to a COPY OF the shape/orientation that 
+	corresponds to the given character and the given orientation */
 	public Shape(char shape, int orientation)
 	{
 	    // initializing width and height variables
@@ -148,6 +155,7 @@ public class Shape {
 	    
 		setShape(shape, orientation);
 	}
+	//arrayCopy2D method that copys shape that corresponds to the given character 
 	private void arraycopy2D(boolean[][] src, int srcPos, boolean[][]  dst,int destPos, int length)
 	{
 		
@@ -155,10 +163,10 @@ public class Shape {
 	        System.arraycopy(src[i], srcPos, dst[i],destPos, src[i].length);
 	    }
 	}
-	
+	//getDimensions method that gets the shape/orientation that we want to find the dimensions of
 	private static int[] getDimensions(char shape, int orientation) {
 	    int[] dimensions = {0, 0};
-	    boolean[][] shapeArr = shapes[shapeLetters.indexOf(Character.toUpperCase(shape))][orientation]; // getting the shape/orientation that we want to find the dimensions of
+	    boolean[][] shapeArr = shapes[shapeLetters.indexOf(Character.toUpperCase(shape))][orientation]; 
 	    int shapeStart = -1; // index of the start of the shape's width or height 
 	    int shapeEnd = -1; // index of the end of the shape's width or height
 	    
@@ -167,15 +175,15 @@ public class Shape {
 	        for(int c = 0; c < shapeArr[0].length; c ++ ) {
 	            if(shapeStart == -1 && shapeArr[r][c])
 	                shapeStart = r;
-	        } // end for
-	    } // end for
+	        } 
+	    } 
 	    
 	    for(int r = shapeArr.length - 1; r >= 0; r --) {
             for(int c = 0; c < shapeArr[0].length; c ++ ) {
                 if(shapeEnd == -1 && shapeArr[r][c])
                     shapeEnd = r;
-            } // end for
-        } // end for
+            } 
+        } 
 	    
 	    dimensions[0] = shapeEnd - shapeStart + 1;
 	    shapeStart = -1;
@@ -186,29 +194,32 @@ public class Shape {
             for(int r = 0; r < shapeArr.length; r ++ ) {
                 if(shapeStart == -1 && shapeArr[r][c])
                     shapeStart = c;
-            } // end for
-        } // end for
+            } 
+        } 
 	    
 	    for(int c = shapeArr[0].length - 1; c >= 0; c --) {
             for(int r = 0; r < shapeArr.length; r ++ ) {
                 if(shapeEnd == -1 && shapeArr[r][c])
                     shapeEnd = c;
-            } // end for
-        } // end for
+            } 
+        } 
 	    
 	    dimensions[1] = shapeEnd - shapeStart + 1;
 	    
 	    return dimensions;
 	}
-	
+	//getHeight mehod that returns height
 	public int getHeight()
 	{
 		return this.height;
 	}
+	//getWidth method that returns width
 	public int getWidth()
 	{
 		return this.width;
 	}
+	//setShape method that accepts a character corresponding to the block shapes
+	//Sets shape[][] to the corresponding final static 2D array in this class
 	public void setShape(char shape, int orientation)
 	{
 	    shape = Character.toUpperCase(shape);
@@ -252,19 +263,21 @@ public class Shape {
         this.width = dimensions[1];
 	
 	}
+	//setShape method that sets current shape with it't corresponding orentiation
 	public void setShape(int orientation)
 	{
 	 	setShape(this.currentShape,orientation);
 	}
+	//getShape method that returns shape
 	public boolean[][] getShape()
 	{
 		return shape;
 	}
-	
+	//setLetter  method that sets letter
 	public void setLetter(char l) {
 	    letter = l;
 	} 
-	
+	//getLetter method that returns letter
 	public char getLetter() {
 	    return letter;
 	}
