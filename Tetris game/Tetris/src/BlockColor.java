@@ -1,3 +1,9 @@
+/**
+* Author George Maddux
+* Due Date 12/2/2020
+* Class CSCI-3033-001
+* defines and provides the color values the blocks will be displayed with
+*/
 import javafx.scene.paint.Color;
 
 public class BlockColor {
