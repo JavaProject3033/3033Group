@@ -1,68 +1,51 @@
-import java.util.*;
+import java.util.*;	//Upload the java utility library
 
-public class Board 
+public class Board 	//Board class made public
 {
-    public final static int ROWS = 20;
-    public final static int COLS = 10;
-    final int MAX_BLOCKS = ROWS * COLS / 4;
-    boolean board[][];
-    Block blocks[];
-    int blocksLength;
+    public final static int ROWS = 20;	//A constant number of rows in the game that will not change
+    public final static int COLS = 10;	//A constant number of columns in the game that will not change
+    final int MAX_BLOCKS = ROWS * COLS / 4;	//Constant number of maximum blocks that will fit in the board
+    boolean board[][];	//Boolean array for the board
+    Block blocks[];	
+    int blocksLength;	//Integer holding the length of the blocks
     Block futureBlocks[];
-    double normalBlockSpeed;
-    double dropBlockSpeed;
-    int squareSideLength;
-    int currentBlockIndex;
-    Block current;
+    double normalBlockSpeed;	//Double variable to contain the speed of the block to go down normally
+    double dropBlockSpeed;	//Double variable to contain the speed that the block will drop in that will gradually increase
+    int squareSideLength;	//Integer variable holding the length of the square side
+    int currentBlockIndex;	//Integer variable containing the index of the current block dropping
+    Block current;	//Current block
     
-    Board()
+    Board()	//Constructor
     {
-       /*
-        Initialize board[][] with zeros
-	Initialize blocks[]
-	Generate/initialize futureBlocks
-	Initialize normalBlockSpeed to 0
-	Initialize dropBlockSpeed to 0
-	Initialize squareSideLength to 0
-	Initialize current to futureBlocks[0]
-        */ 
-        board = new boolean[ROWS][COLS];
-        blocks = new Block[MAX_BLOCKS];
-        blocksLength = 0;
-        futureBlocks = new Block[Shape.NUM_SHAPES];
-        generateNewFutureBlocks();
-        normalBlockSpeed = 0;
-        dropBlockSpeed = 0;
-        squareSideLength = 0;
-        current = futureBlocks[0];
+        board = new boolean[ROWS][COLS];	//Declare a new board
+        blocks = new Block[MAX_BLOCKS];		//Declare a new number of max blocks
+        blocksLength = 0;		//Initialize the length of the block to 0
+        futureBlocks = new Block[Shape.NUM_SHAPES];	//Generate future blocks
+        generateNewFutureBlocks();	//To generate new future blocks
+        normalBlockSpeed = 0;		//Initialize normal block speed to 0
+        dropBlockSpeed = 0;		//Initialize drop block speed to 0
+        squareSideLength = 0;		//Initialize length of square side to 0
+        current = futureBlocks[0];	//Initialize current to futureBlocks[0]
+        currentBlockIndex = 0;		//Initialize currentBlockIndex to 0
+        addBlock(current);
+    }
+    
+    Board(int normalSpeed, int dropSpeed, int sideLen)	//Constructor with parameters
+    {
+        board = new boolean[ROWS][COLS];	//New board created
+        blocks = new Block[MAX_BLOCKS];		//New block created with maximum number of blocks
+        blocksLength = 0;			//Initialize blocksLength to be 0
+        futureBlocks = new Block[Shape.NUM_SHAPES];	//Generate future blocks
+        generateNewFutureBlocks();		//Call the generateNewFutureBlocks
+        normalBlockSpeed = normalSpeed;		//Initialize the normalBlockSpeed to the normal speed of the game
+        dropBlockSpeed = dropSpeed;		//Initialize the dropBlockSpeed to the dropSpeed
+        squareSideLength = sideLen;		//Initialize the squareSideLength to sideLen
+        current = futureBlocks[0];		
         currentBlockIndex = 0;
         addBlock(current);
     }
     
-    Board(int normalSpeed, int dropSpeed, int sideLen)
-    {
-        /*
-        Initialize board[][] with zeros
-        Initialize blocks[]
-        Generate/initialize futureBlocks
-        Initialize normalBlockSpeed to the given argument
-        Initialize dropBlockSpeed to the given argument
-        Initialize squareSideLength to the given argument
-        */
-        board = new boolean[ROWS][COLS];
-        blocks = new Block[MAX_BLOCKS];
-        blocksLength = 0;
-        futureBlocks = new Block[Shape.NUM_SHAPES];
-        generateNewFutureBlocks();
-        normalBlockSpeed = normalSpeed;
-        dropBlockSpeed = dropSpeed;
-        squareSideLength = sideLen;
-        current = futureBlocks[0];
-        currentBlockIndex = 0;
-        addBlock(current);
-    }
-    
-    void clearRow()
+    void clearRow()	//Method the clear row when it is full
     {
         /*
         Checks each row and clears them if needed by setting the cleared portions in the shape to be false
@@ -104,7 +87,7 @@ public class Board
         System.out.println("in clearRow method\n" + toString());
     }
     
-    void clearColors()
+    void clearColors()	//Clear the colors that match together
     {
         // Board is array of boolean. how to check the color
         // 
@@ -155,7 +138,7 @@ public class Board
         } // end for
     }
     
-    void nextBlock()
+    void nextBlock()	//Method to go to the next block
     {
         /*
         Places the next block into the current variable
@@ -176,7 +159,7 @@ public class Board
         addBlock(current);
     }
     
-    boolean isValidLocation(int x, int y)
+    boolean isValidLocation(int x, int y)	//Boolean method to show if the location is valid or not
     {      
         /*
         Checks to see if a point is on the board
@@ -188,7 +171,7 @@ public class Board
             return true;
     }
     
-    void generateNewFutureBlocks()
+    void generateNewFutureBlocks()	//Void method to generate the next block after the current block is fully loaded onto the board
     {
         /*
         Generates new blocks for the futureBlocks array.
@@ -229,7 +212,7 @@ public class Board
         }
     }
     
-    void moveBlocksDown()
+    void moveBlocksDown()	//Void method to move the blocks downwards
     {
         /*
         Checks to make sure that there are no blocks that are randomly floating
@@ -303,7 +286,7 @@ public class Board
         board = newBoard;
     }    
     
-    void removeBlankBlocks()
+    void removeBlankBlocks()	//Void method to remove the blank blocks on the board
     {
         /*
             Checks the blocks array and removes any blocks whose shapes are 
@@ -321,7 +304,7 @@ public class Board
         blocksLength = validBlocks.size();
     }
         
-    void addBlock(Block b) {
+    void addBlock(Block b) {	//void method to add a block onto the board
         blocks[blocksLength] = b;
         blocksLength ++;
         
@@ -336,7 +319,7 @@ public class Board
         } // end for
     } // end addBlock
     
-    void removeBlock(Block b) {
+    void removeBlock(Block b) {	//void function to remove a block from the board
         // making sure the remove is reflected in the board array
         int[] points = b.getPoints();
         
@@ -358,7 +341,7 @@ public class Board
         } // end for
     } // end removeBlock
     
-    void removeBlock(int x, int y) {
+    void removeBlock(int x, int y) {	//void method to remove block from board with 2 parameters
         // finding the block to remove
         for(int i = 0; i < blocksLength; i ++) {
             Block current = blocks[i];
@@ -372,7 +355,7 @@ public class Board
         } // end for
     } // end removeBlock
     
-    void removeBlock(int index) {
+    void removeBlock(int index) {	//void method to remove the block from the board with the index as parameter
         Block b = blocks[index];
         
         // making sure the remove is reflected in the board array
