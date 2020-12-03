@@ -158,9 +158,9 @@ class Block {
                     firstPoint[0] = r;
                     firstPoint[1] = c;
                     return firstPoint;
-                } // end if
-            } // end for
-        } // end for
+                } 
+            } 
+        } 
         
         return firstPoint;
 	}
@@ -175,15 +175,15 @@ class Block {
                 if(shapeArr[r][c]) {
                     
                     return currentPoint;
-                } // end if
+                } 
                 
                 else if(normalShapeArr[r][c]) {
                     currentPoint += 2;
-                } // end if
-            } // end for
+                } 
+            } 
             
             
-        } // end for
+        } 
         
         return -1;
 	}
